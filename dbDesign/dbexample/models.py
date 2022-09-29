@@ -41,7 +41,7 @@ class ProductSet(models.Model):
     """
 
     web_id = models.CharField(
-        _("product_set web id"), unique=True, max_lenght=50, help_text=_("")
+        _("product_set web id"), unique=True, max_length=50, help_text=_("")
     )
     slug = models.SlugField(
         _("product_set url"),
