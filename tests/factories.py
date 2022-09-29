@@ -11,7 +11,9 @@ class ProductCategoryFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.ProductCategory
 
-    name = fake.lexify('prod_cat_name_????????')
-    slug = fake.lexify('prod_cat_slug_????????')
+    name = factory.Sequence(lambda name: f"prod_cat_name_{name}")
+    slug = factory.Sequence(lambda slug: f"prod_cat_name_{slug}")
+    #name = fake.lexify('prod_cat_name_????????')
+    #slug = fake.lexify('prod_cat_slug_????????')
 
 register(ProductCategoryFactory)

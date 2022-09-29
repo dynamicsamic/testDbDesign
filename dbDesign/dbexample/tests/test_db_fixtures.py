@@ -19,12 +19,11 @@ from dbexample import models
 @pytest.mark.parametrize(
     'name, slug, is_active',
     [
-        ('desktops', 'desktop', True),
-        ('laptops', 'laptop', True),
-        ('accessories', 'accessories', True)
+        ('cat-1', 'cat_1', True),
+        ('cat-2', 'cat_2', True),
+        ('cat-3', 'cat_3', True)
     ],
 )
-@pytest.mark.django_db
 def test_product_db_category_insert_data(
     db, product_category_factory, name, slug, is_active
 ):
@@ -33,3 +32,22 @@ def test_product_db_category_insert_data(
     assert result.slug == slug
     assert result.is_active == is_active
 
+
+@pytest.mark.dbfixture
+@pytest.mark.parametrize(
+    'id, web_id, name, slug, description, is_active, created_at, updated_at',
+    [
+        (
+            1,
+            '44280',
+            'Lenovo ThinkPad X12',
+            'Some generic laptop description',
+            True,
+            '2022-09-29 08:13:20',
+            '2022-09-30 00:13:20',
+        )
+    ]
+)
+def test_product_db_product_set_dbfixture(db, db_fixture_setup, id, web_id, name, slug, description, is_active, created_at, updated_at):
+    result = models.ProductSet.objects.get(id=id)
+    assert result.web_id == web_id
