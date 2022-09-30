@@ -41,7 +41,10 @@ class ProductSet(models.Model):
     """
 
     web_id = models.CharField(
-        _("product_set web id"), unique=True, max_length=50, help_text=_("")
+        _("product_set web id"),
+        unique=True,
+        max_length=50,
+        help_text=_("required, numbers"),
     )
     slug = models.SlugField(
         _("product_set url"),
@@ -56,11 +59,9 @@ class ProductSet(models.Model):
         help_text=_("required, max_len: 150"),
     )
     description = models.TextField(
-        _(
-            "product_set description",
-            max_length=2000,
-            help_text=_("required, max_len: 2000"),
-        )
+        _("product_set description"),
+        max_length=2000,
+        help_text=_("required, max_len: 2000"),
     )
     category = models.ManyToManyField(ProductCategory)
     is_active = models.BooleanField(
