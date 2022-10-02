@@ -63,11 +63,14 @@ class ProductSet(models.Model):
         max_length=2000,
         help_text=_("required, max_len: 2000"),
     )
-    category = models.ManyToManyField(ProductCategory)
+    categories = models.ManyToManyField(ProductCategory)
     is_active = models.BooleanField(
         _("product_set status"),
         default=False,
         help_text=_("bool; optional; default: False"),
+    )
+    brand = models.CharField(
+        _("product_set brand"), help_text="change this to Foreign key"
     )
     created_at = models.DateTimeField(
         _("product_set creation time"),
