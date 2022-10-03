@@ -72,6 +72,16 @@ def test_product_db_product_set_dbfixture(
         description=description,
         is_active=is_active,
         created_at=created_at,
-        updated_at=updated_at
+        updated_at=updated_at,
     )
     assert result.web_id == web_id
+
+
+@pytest.mark.django_db
+def test_product_set_factorydfdfdf(
+    db, productset_factory, product_category_factory
+):
+    category = product_category_factory.create()
+    product = productset_factory.create(category=(1, 2))
+    categories = product.categories.all().count()
+    print(categories)
