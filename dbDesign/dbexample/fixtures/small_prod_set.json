@@ -1,0 +1,21 @@
+[
+    {
+        "model": "dbexample.productset",
+        "id": "1",
+        "fields": {
+            "web_id": "102999",
+            "slug": "geneic_slug",
+            "name": "Dell Laptop",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+            "categories": [
+                1,
+                2
+            ],
+            "p_type": "1",
+            "is_active": "True",
+            "brand": "1",
+            "created_at": "2017-06-22T03:22:09Z",
+            "updated_at": "2018-06-20T21:02:53Z"
+        }
+    }
+]

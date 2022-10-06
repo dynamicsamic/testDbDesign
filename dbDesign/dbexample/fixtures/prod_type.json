@@ -1,0 +1,9 @@
+[
+    {
+        "model": "dbexample.producttype",
+        "id": "1",
+        "fields": {
+            "name": "laptop"
+        }
+    }
+]

@@ -1,0 +1,26 @@
+[
+    {
+        "model": "dbexample.productattributevalue",
+        "id": "1",
+        "fields": {
+            "attr": "1",
+            "value": "Intel Core i7"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "id": "2",
+        "fields": {
+            "attr": "1",
+            "value": "Intel Core i5"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "id": "3",
+        "fields": {
+            "attr": "1",
+            "value": "Ryzen 5"
+        }
+    }
+]

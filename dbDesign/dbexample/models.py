@@ -41,6 +41,7 @@ class ViewsCountAutoIncrementMixin:
         return result
 
 
+'''
 class Address(models.Model):
     """Physical address."""
 
@@ -71,6 +72,7 @@ class Address(models.Model):
         help_text=_("optional"),
     )
     zip_code = ...
+'''
 
 
 class Agent(models.Model):
@@ -80,9 +82,10 @@ class Agent(models.Model):
         unique=True,
         help_text=_("required, max_len: 150"),
     )
-    adress = models.ForeignKey(
-        Address, related_name="agents", on_delete=models.PROTECT
-    )
+    # adress = models.ForeignKey(
+    #    Address, related_name="agents", on_delete=models.PROTECT
+    # )
+    address = models.CharField(max_length=200)
 
     class Meta:
         abstract = True
@@ -226,9 +229,12 @@ class ProductAttribute(models.Model):
         help_text=_("required, max_len: 150"),
     )
 
+    def __str__(self):
+        return self.name
+
 
 class ProductAttributeValue(models.Model):
-    attribute = models.ForeignKey(
+    attr = models.ForeignKey(
         ProductAttribute, related_name="values", on_delete=models.PROTECT
     )
     value = models.CharField(
@@ -238,14 +244,17 @@ class ProductAttributeValue(models.Model):
         help_text=_("required, max_length: 255"),
     )
 
+    def __str__(self):
+        return f"{self.attr}: {self.value}"
+
 
 class ProductItem(models.Model):
     """Particular item of product with specific attributes."""
 
-    class CustomManager(ViewsCountAutoIncrementMixin, Manager):
-        pass
+    # class CustomManager(ViewsCountAutoIncrementMixin, Manager):
+    #    pass
 
-    objects = CustomManager()
+    # objects = CustomManager()
     sku = models.CharField(
         _("stock keeping unit"),
         max_length=20,
@@ -254,7 +263,11 @@ class ProductItem(models.Model):
     product_set = models.ForeignKey(
         ProductSet, related_name="items", on_delete=models.CASCADE
     )
-    attributes = models.ManyToManyField(ProductAttributeValue)
+    attrs = models.ManyToManyField(
+        ProductAttributeValue,
+        related_name="product_items",
+        through="ProductToAttributeLinkTable",
+    )
     # images = models.ForeignKey(
     #    ImageSet, related_name="product_items", on_delete=models.SET_DEFAULT
     # )
@@ -270,14 +283,14 @@ class ProductItem(models.Model):
         decimal_places=2,
         help_text=_("required, max_price: 9_999_999.99"),
     )
-    discount = models.ManyToManyField(Discount)
+    # discount = models.ManyToManyField(Discount)
     is_active = models.BooleanField(
         _("product item status"),
         default=False,
         help_text=_("bool; optional; default: False"),
     )
-    view_count = models.PositiveIntegerField(
-        _("number of views", default=0, help_text="required, starts with 0")
+    _view_count = models.PositiveIntegerField(
+        _("number of views"), default=0, help_text="required, starts with 0"
     )
     created_at = models.DateTimeField(
         _("product item creation time"),
@@ -293,7 +306,34 @@ class ProductItem(models.Model):
     def __str__(self):
         return f"{self.product_set.name}: {self.sku}"
 
+    @property
+    def views(self):
+        return self._view_count
 
+    def increment_view_count(self):
+        self._view_count += 1
+        self.save()
+
+
+class ProductToAttributeLinkTable(models.Model):
+    """Link table for product items and attribute values."""
+
+    product_item = models.ForeignKey(ProductItem, on_delete=models.PROTECT)
+    attr_values = models.ForeignKey(
+        ProductAttributeValue,
+        on_delete=models.PROTECT,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["product_item", "attr_values"],
+                name="unique_product_attr",
+            )
+        ]
+
+
+"""
 class Media(models.Model):
     product_item = models.ForeignKey(
         ProductItem, related_name="media", on_delete=models.CASCADE
@@ -319,6 +359,7 @@ class Media(models.Model):
         auto_now=True,
         help_text=_("format: Y-m-d H:M:S"),
     )
+"""
 
 
 class Stock(models.Model):
@@ -335,6 +376,11 @@ class Stock(models.Model):
     )
     current_amount = models.PositiveIntegerField(
         _("current amount of product"),
+        default=0,
+        help_text=_("required, default: 0"),
+    )
+    items_sold = models.PositiveIntegerField(
+        _("amount of product sold"),
         default=0,
         help_text=_("required, default: 0"),
     )

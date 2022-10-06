@@ -1,0 +1,10 @@
+[
+    {
+        "model": "dbexample.supplier",
+        "id": "1",
+        "fields": {
+            "name": "Dell",
+            "address": "USA"
+        }
+    }
+]
