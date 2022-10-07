@@ -1,3 +1,303 @@
+{
+    "model": "dbexample.productset",
+    "id": "1031",
+    "fields": {
+        "web_id": "103593",
+        "slug": "geneic_slug",
+        "name": "MSI - WS Series 15.6 Laptop - Intel Core i7 - 16GB Memory - 256GB Solid State Drive + 2TB Hard Drive - Aluminum Black\"",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+        "categories": "Computers,Computers & Accessories,Traditional Laptops,Windows 10 Laptops,Electronics,Computers & Tablets,Laptops,All Laptops,PC Laptops",
+        "is_active": "True",
+        "brand": "MSI",
+        "created_at": "2017-04-03T19:33:36Z",
+        "updated_at": "2018-06-13T19:13:51Z"
+    }
+},
+{
+    "model": "dbexample.productset",
+    "id": "1420",
+    "fields": {
+        "web_id": "104760",
+        "slug": "geneic_slug",
+        "name": "Razer - Blade Pro 17.3 4K Ultra HD Touch-Screen Laptop - Intel Core i7 - 32GB Memory - NVIDIA GeForce GTX 1080 - 1TB SSD - Black\"",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+        "categories": "Computers/Tablets & Networking,Computers & Accessories,PC Laptops & Netbooks,Laptops & Netbooks,Traditional Laptops,Computers & Tablets,Electronics,Laptops,All Laptops,PC Laptops",
+        "is_active": "True",
+        "brand": "Razer",
+        "created_at": "2017-05-22T07:36:58Z",
+        "updated_at": "2018-06-13T19:39:16Z"
+    }
+},
+{
+    "model": "dbexample.productset",
+    "id": "1708",
+    "fields": {
+        "web_id": "105624",
+        "slug": "geneic_slug",
+        "name": "Details About Alienware 13 R3 Aw13r3/13.3 Fhd/i77700hq/nvidia Gtx 1060/16gb/512gb Ssd\"",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+        "categories": "Computers/Tablets & Networking,PC Laptops & Netbooks,Computers & Accessories,Laptops & Netbooks,Traditional Laptops,Computers & Tablets,Electronics,Laptops,All Laptops,PC Laptops",
+        "is_active": "True",
+        "brand": "Alienware",
+        "created_at": "2017-03-06T15:01:33Z",
+        "updated_at": "2018-07-03T19:53:01Z"
+    }
+},
+{
+    "model": "dbexample.productset",
+    "id": "1734",
+    "fields": {
+        "web_id": "105702",
+        "slug": "geneic_slug",
+        "name": "Lenovo Flex 4 1470 80SA0000US 2-in-1 - 14 HD Touch - Pentium 4405U 2.1Ghz - 4GB - 500GB\"",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+        "categories": "Electronics,Computers,Laptops,Shop Laptops by Type,2-in-1 Laptops,Computers & Tablets,All Laptops,PC Laptops,Computers & Accessories,2 in 1 Laptops,Computers/Tablets & Networking,Laptops & Netbooks,PC Laptops & Netbooks,Laptop & Desktop Accessories,Laptop Add-On Cards,Laptop Network Cards,Traditional Laptops,TVs & Electronics,Computers & Laptops",
+        "is_active": "True",
+        "brand": "Lenovo",
+        "created_at": "2015-12-01T01:18:10Z",
+        "updated_at": "2018-01-03T18:35:44Z"
+    }
+},
+{
+    "model": "dbexample.productset",
+    "id": "2178",
+    "fields": {
+        "web_id": "107034",
+        "slug": "geneic_slug",
+        "name": "HP 15-AY103DX 15.6 Touchscreen Touch Screen HD Laptop Notebook PC Computer 7th Gen i5-7200U Kaby Lake 8GB Memory 1TB HDD Hard Drive Windows 10\"",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+        "categories": "Electronics,Computers,Laptops,Shop Laptops by Type,Touchscreen Laptops,Computers & Accessories,Computers & Tablets,Traditional Laptops,Computers/Tablets & Networking,Laptops & Netbooks,PC Laptops & Netbooks",
+        "is_active": "True",
+        "brand": "HP",
+        "created_at": "2017-03-03T16:56:10Z",
+        "updated_at": "2018-01-09T08:04:11Z"
+    }
+},
+{
+    "model": "dbexample.productset",
+    "id": "1192",
+    "fields": {
+        "web_id": "104076",
+        "slug": "geneic_slug",
+        "name": "Samsung - 960 EVO 500GB Internal PCI Express 3.0 x4 (NVMe) Solid State Drive for Laptops",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+        "categories": "Computers,Hard Drives,Drives, Storage & Blank Media,Solid State Drives,Internal Drives,Hard Drives (HDD, SSD & NAS),Computers & Accessories,Computer Accessories & Peripherals,Internal Hard Disk Drives,Frys,Electronics,Hard Drives & Storage,Drives Storage,Solid State Drives (SSDs),PC Components,Computers/Tablets & Networking,Internal Solid State Drives,Computer Components,See more Samsung 960 EVO 500gb NVMe M.2 Internal SSD,Computers & Tablets,Data Storage Products,Internal Drives szwzcatdryyexyswev,Data Storage,Solid State Drives - SSD",
+        "is_active": "True",
+        "brand": "Samsung",
+        "created_at": "2016-12-12T23:14:09Z",
+        "updated_at": "2018-06-13T19:39:08Z"
+    }
+},
+{
+    "model": "dbexample.productset",
+    "id": "1379",
+    "fields": {
+        "web_id": "104637",
+        "slug": "geneic_slug",
+        "name": "MSI - 15.6 Laptop - Intel Core i7 - 16GB Memory - NVIDIA GeForce GTX 1060 - 1TB Hard Drive + 256GB Solid State Drive - Black\"",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+        "categories": "Computers,Shop Laptops by Type,All Laptop Computers,Computers & Accessories,Traditional Laptops,Featured Laptops,Electronics,Computers & Tablets,Laptops,Notebooks,All Laptops,PC Laptops",
+        "is_active": "True",
+        "brand": "MSI",
+        "created_at": "2017-05-08T21:56:51Z",
+        "updated_at": "2018-06-13T19:39:10Z"
+    }
+},
+{
+    "model": "dbexample.productset",
+    "id": "1734",
+    "fields": {
+        "web_id": "105702",
+        "slug": "geneic_slug",
+        "name": "Lenovo Flex 4 1470 80SA0000US 2-in-1 - 14 HD Touch - Pentium 4405U 2.1Ghz - 4GB - 500GB\"",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+        "categories": "Electronics,Computers,Laptops,Shop Laptops by Type,2-in-1 Laptops,Computers & Tablets,All Laptops,PC Laptops,Computers & Accessories,2 in 1 Laptops,Computers/Tablets & Networking,Laptops & Netbooks,PC Laptops & Netbooks,Laptop & Desktop Accessories,Laptop Add-On Cards,Laptop Network Cards,Traditional Laptops,TVs & Electronics,Computers & Laptops",
+        "is_active": "True",
+        "brand": "Lenovo",
+        "created_at": "2015-12-01T01:18:10Z",
+        "updated_at": "2018-01-03T18:35:44Z"
+    }
+},
+{
+    "model": "dbexample.productset",
+    "id": "2562",
+    "fields": {
+        "web_id": "108186",
+        "slug": "geneic_slug",
+        "name": "Dell - XPS 2-in-1 13.3 Touch-Screen Laptop - Intel Core i7 - 16GB Memory - 256GB Solid State Drive - Silver\"",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+        "categories": "Computers/Tablets & Networking,PC Laptops & Netbooks,Laptops & Netbooks,Computers & Tablets,Electronics,Laptops,2 in 1 Laptops",
+        "is_active": "True",
+        "brand": "Dell",
+        "created_at": "2017-01-24T16:19:26Z",
+        "updated_at": "2018-06-18T07:09:40Z"
+    }
+},
+{
+    "model": "dbexample.productset",
+    "id": "566",
+    "fields": {
+        "web_id": "102198",
+        "slug": "geneic_slug",
+        "name": "Dell - P2418HT 24 IPS LED FHD Touch-Screen Monitor - Black\"",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+        "categories": "Computers,Computers & Accessories,Monitors, Projectors & Accs,Electronics,Monitors Displays,Computers/Tablets & Networking,Technology,Laptop Accessories,Monitors,Computers & Tablets,Laptops,Computer Monitors,LED Monitors",
+        "is_active": "True",
+        "brand": "Dell",
+        "created_at": "2018-01-30T05:16:15Z",
+        "updated_at": "2018-06-28T19:29:26Z"
+    }
+},
+{
+    "model": "dbexample.productset",
+    "id": "588",
+    "fields": {
+        "web_id": "102264",
+        "slug": "geneic_slug",
+        "name": "XPS 8920 Tower Desktop Computer",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+        "categories": "Computers,Desktops Workstations,Desktop Computers,Desktop Computers wbeszexzzxeteywxtzby,Computers & Tablets,Desktop & All-in-One Computers,All Desktops,Electronics,Computers & Accessories,Desktops,Towers,Computers/Tablets & Networking,Desktops & All-In-Ones,PC Desktops & All-In-Ones",
+        "is_active": "True",
+        "brand": "Dell",
+        "created_at": "2017-05-22T07:39:43Z",
+        "updated_at": "2018-01-03T05:30:13Z"
+    }
+},
+{
+    "model": "dbexample.productset",
+    "id": "324",
+    "fields": {
+        "web_id": "101472",
+        "slug": "geneic_slug",
+        "name": "Toshiba - 3TB Internal Serial ATA III Hard Drive for Desktops",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+        "categories": "Internal Solid State Drives,Computers & Accessories,Computer Accessories & Peripherals,Electronics,Computers & Tablets,Hard Drives & Storage,Data Storage",
+        "is_active": "True",
+        "brand": "Toshiba",
+        "created_at": "2017-07-25T01:24:00Z",
+        "updated_at": "2018-06-18T07:10:19Z"
+    }
+},
+{
+    "model": "dbexample.productset",
+    "id": "586",
+    "fields": {
+        "web_id": "102258",
+        "slug": "geneic_slug",
+        "name": "Lenovo - 300-20ISH 20 All-In-One - Intel Pentium - 4GB Memory - 500GB Hard Drive - Black\"",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+        "categories": "Towers,Computers,Lenovo,Computers & Accessories,Desktops By Brand,Computers & Tablets,Electronics,All Desktops,Desktops,Desktop & All-in-One Computers,Desktop Computers,All-in-One Computers",
+        "is_active": "True",
+        "brand": "Lenovo",
+        "created_at": "2016-03-16T22:25:52Z",
+        "updated_at": "2018-06-13T19:39:21Z"
+    }
+},
+{
+    "model": "dbexample.productset",
+    "id": "1035",
+    "fields": {
+        "web_id": "103605",
+        "slug": "geneic_slug",
+        "name": "Lenovo - 510-23ISH 23 Touch-Screen All-In-One - Intel Core i5 - 8GB Memory - 2TB Hard Drive - Black\"",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+        "categories": "Touch-Screen All-in-One Computers,Computers & Accessories,Computer Components,Frys,Electronics,Desktop Barebones,Computers & Tablets,All Desktops,Desktops,Desktop & All-in-One Computers,PC Computers,All-in-One Computers",
+        "is_active": "True",
+        "brand": "Lenovo",
+        "created_at": "2017-03-02T14:58:39Z",
+        "updated_at": "2018-06-13T19:39:17Z"
+    }
+},
+{
+    "model": "dbexample.productset",
+    "id": "3023",
+    "fields": {
+        "web_id": "109569",
+        "slug": "geneic_slug",
+        "name": "Lenovo - Yoga 710 2-in-1 11.6 Touch-Screen Laptop - Intel Core i5 - 8GB Memory - 128GB Solid State Drive - Silver Tablet PC Notebook 80V6000PUS\"",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+        "categories": "Electronics,Computers,Laptops,Shop Laptops by Type,2-in-1 Laptops,Computers & Tablets,Computers/Tablets & Networking,Laptops & Netbooks,PC Laptops & Netbooks,2 in 1 Laptops,Computers & Accessories",
+        "is_active": "True",
+        "brand": "Lenovo",
+        "created_at": "2016-12-14T19:07:53Z",
+        "updated_at": "2018-03-12T02:39:33Z"
+    }
+},
+{
+    "model": "dbexample.productset",
+    "id": "3258",
+    "fields": {
+        "web_id": "110274",
+        "slug": "geneic_slug",
+        "name": "15.4 MacBook Pro with Touch Bar (Late 2016, Space Gray)",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+        "categories": "Computers,MacBook,Shop Laptops by Type,Computers & Accessories,Apple MacBook Pro,MacBooks,Frys,Electronics,All Laptops,Notebook Computers,Computers/Tablets & Networking,Apple,Mac Laptops,Laptops & Netbooks,MacBook Pro,Traditional Laptops,Featured Laptops,Computers & Tablets,Laptops,Apple Laptops",
+        "is_active": "True",
+        "brand": "Apple",
+        "created_at": "2016-12-12T23:37:36Z",
+        "updated_at": "2018-05-24T17:14:20Z"
+    }
+},
+{
+    "model": "dbexample.productset",
+    "id": "1539",
+    "fields": {
+        "web_id": "105117",
+        "slug": "geneic_slug",
+        "name": "27 iMac with Retina 5K Display (Mid 2017)",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+        "categories": "Computers,Computers & Accessories,iMac,Computers & Tablets,Electronics,All Desktops,All-in-Ones,Desktops Workstations,Desktops,Desktop & All-in-One Computers",
+        "is_active": "True",
+        "brand": "Apple",
+        "created_at": "2017-07-12T16:00:33Z",
+        "updated_at": "2018-06-21T21:33:10Z"
+    }
+},
+{
+    "model": "dbexample.productset",
+    "id": "2987",
+    "fields": {
+        "web_id": "109461",
+        "slug": "geneic_slug",
+        "name": "Samsung - 960 EVO 250GB Internal PCI Express 3.0 x4 (NVMe) Solid State Drive for Laptops",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+        "categories": "Computers,Hard Drives,Drives, Storage & Blank Media,Solid State Drives,Internal Drives,Hard Drives (HDD, SSD & NAS),Computers & Accessories,Computer Accessories & Peripherals,Electronics,Hard Drives & Storage,Drives Storage,Solid State Drives (SSDs),Computers/Tablets & Networking,Internal Solid State Drives,See more Samsung 960 EVO SSD PCIe NVMe M.2 250GB,Computer Components,Computers & Tablets,Data Storage Products,Data Storage",
+        "is_active": "True",
+        "brand": "Samsung",
+        "created_at": "2016-12-12T23:38:26Z",
+        "updated_at": "2018-06-13T19:38:51Z"
+    }
+},
+{
+    "model": "dbexample.productset",
+    "id": "2415",
+    "fields": {
+        "web_id": "107745",
+        "slug": "geneic_slug",
+        "name": "Details About Razer Cynosa Chroma Rgb Gaming Keyboard Spillresistant Durable Design",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+        "categories": "Accessories,Computers/Tablets & Networking,Keyboards, Mice & Pointers,Mice & Keyboards,Computer Accessories & Peripherals,Video Games,Computer Keyboards,Wired & USB Keyboards,Keyboards & Keypads,Computers & Tablets,Gaming Keyboards",
+        "is_active": "True",
+        "brand": "Razer",
+        "created_at": "2018-05-28T12:27:48Z",
+        "updated_at": "2018-07-02T16:00:23Z"
+    }
+},
+{
+    "model": "dbexample.productset",
+    "id": "1265",
+    "fields": {
+        "web_id": "104295",
+        "slug": "geneic_slug",
+        "name": "Details About Razer Kraken Pro V2 Analog Gaming Headset For Pc/xbox One/ps4 Black (p05)",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
+        "categories": "Computers,Audio & Video Accessories,Microphones & Headsets,Audio & Video Components,Computers & Accessories,Electronics,PC Computers,Gaming Headsets,Headsets & Microphones,Video Games,PC Gaming Accessories,Speakers, Headsets, Mics Webcams,All PC Headsets,Computers & Tablets,Over-Ear and On-Ear Headphones,Video Game Accessories,Computer Accessories,Computer Accessories & Peripherals,PC & Digital Gaming,Frys,Headphones,Computers/Tablets & Networking,Laptop & Desktop Accessories,Headsets,See more Razer Kraken Pro V2 Analog Gaming Headset for ...,Computer Peripherals,Microphone & Headsets,Computer Headsets,PC Headsets,Audio,Shop Headphones by Type,Video Games & Consoles",
+        "is_active": "True",
+        "brand": "Razer",
+        "created_at": "2017-03-03T16:55:29Z",
+        "updated_at": "2018-06-20T13:14:28Z"
+    }
+},
 [
     {
         "model": "dbexample.productset",

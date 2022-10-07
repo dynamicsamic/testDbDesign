@@ -98,6 +98,22 @@ class Supplier(Agent):
     pass
 
 
+class Producer(models.Model):
+    name = models.CharField(
+        _("manufacturer name"),
+        max_length=150,
+        unique=True,
+        help_text=_("required, max_len: 150"),
+    )
+    description = models.TextField(
+        _("producer brief info"),
+        max_length=2000,
+        blank=True,
+        null=True,
+        help_text=_("optional, max_len: 2000"),
+    )
+
+
 class Brand(models.Model):
     name = models.CharField(
         _("brand name"),
@@ -105,8 +121,16 @@ class Brand(models.Model):
         unique=True,
         help_text=_("required, max_len: 150"),
     )
-    supplier = models.ForeignKey(
-        Supplier,
+    description = models.TextField(
+        _("brand brief info"),
+        max_length=2000,
+        blank=True,
+        null=True,
+        help_text=_("optional, max_len: 2000"),
+    )
+    logo = models.CharField(_("replace this to imagefield"), max_length=30)
+    producer = models.ForeignKey(
+        Producer,
         related_name="brands",
         on_delete=models.SET_NULL,
         blank=True,
@@ -124,6 +148,7 @@ class ProductType(models.Model):
         unique=True,
         help_text=_("required, max_len: 150"),
     )
+    logo = models.CharField(_("replace this to imagefield"), max_length=30)
 
     def __str__(self):
         return self.name
@@ -292,6 +317,7 @@ class ProductItem(models.Model):
     _view_count = models.PositiveIntegerField(
         _("number of views"), default=0, help_text="required, starts with 0"
     )
+    made_in = models.CharField(_("change this to country FK"), max_len=150)
     created_at = models.DateTimeField(
         _("product item creation time"),
         auto_now_add=True,

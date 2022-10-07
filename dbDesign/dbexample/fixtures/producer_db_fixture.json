@@ -1,0 +1,138 @@
+[
+    {
+        "model": "dbexample.supplier",
+        "id": "1",
+        "fields": {
+            "name": "Dell Inc.",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis."
+        }
+    },
+    {
+        "model": "dbexample.supplier",
+        "id": "2",
+        "fields": {
+            "name": "Samsung Electronics Co., Ltd",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis."
+        }
+    },
+    {
+        "model": "dbexample.supplier",
+        "id": "3",
+        "fields": {
+            "name": "AsusTek Computer Inc.",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis."
+        }
+    },
+    {
+        "model": "dbexample.supplier",
+        "id": "4",
+        "fields": {
+            "name": "Apple Inc.",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis."
+        }
+    },
+    {
+        "model": "dbexample.supplier",
+        "id": "5",
+        "fields": {
+            "name": "Acer Inc.",
+            "description": ""
+        }
+    },
+    {
+        "model": "dbexample.supplier",
+        "id": "6",
+        "fields": {
+            "name": "Lenovo Group Ltd",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis."
+        }
+    },
+    {
+        "model": "dbexample.supplier",
+        "id": "7",
+        "fields": {
+            "name": "Hewlett-Packard Company",
+            "description": ""
+        }
+    },
+    {
+        "model": "dbexample.supplier",
+        "id": "8",
+        "fields": {
+            "name": "Huawei Technologies Co. Ltd.",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis."
+        }
+    },
+    {
+        "model": "dbexample.supplier",
+        "id": "9",
+        "fields": {
+            "name": "Xiaomi Corporation",
+            "description": ""
+        }
+    },
+    {
+        "model": "dbexample.supplier",
+        "id": "10",
+        "fields": {
+            "name": "NEC Corporation",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis."
+        }
+    },
+    {
+        "model": "dbexample.supplier",
+        "id": "11",
+        "fields": {
+            "name": "Toshiba Corporation",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis."
+        }
+    },
+    {
+        "model": "dbexample.supplier",
+        "id": "12",
+        "fields": {
+            "name": "IBM Corporation",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis."
+        }
+    },
+    {
+        "model": "dbexample.supplier",
+        "id": "13",
+        "fields": {
+            "name": "Fujitsu Limited",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis."
+        }
+    },
+    {
+        "model": "dbexample.supplier",
+        "id": "14",
+        "fields": {
+            "name": "Microsoft Corporation",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis."
+        }
+    },
+    {
+        "model": "dbexample.supplier",
+        "id": "15",
+        "fields": {
+            "name": "Micro-Star International Co., Ltd (MSI)",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis."
+        }
+    },
+    {
+        "model": "dbexample.supplier",
+        "id": "16",
+        "fields": {
+            "name": "LG Electronics Inc.",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis."
+        }
+    },
+    {
+        "model": "dbexample.supplier",
+        "id": "17",
+        "fields": {
+            "name": "Razer Inc.",
+            "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis."
+        }
+    }
+]

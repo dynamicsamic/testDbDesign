@@ -1,0 +1,299 @@
+[
+    {
+        "model": "dbexample.productcategory",
+        "pk": "1",
+        "fields": {
+            "name": "Computers",
+            "slug": "computers",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "2",
+        "fields": {
+            "name": "Computers & Accessories",
+            "slug": "computers-and-accessories",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "3",
+        "fields": {
+            "name": "Computer Accessories",
+            "slug": "computer-accessories",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "4",
+        "fields": {
+            "name": "Computer Components",
+            "slug": "computer-components",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "5",
+        "fields": {
+            "name": "Computers & Tablets",
+            "slug": "computers-and-tablets",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "6",
+        "fields": {
+            "name": "Electronics",
+            "slug": "electronics",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "7",
+        "fields": {
+            "name": "Computer Cards & Components",
+            "slug": "computer-cards-and-components",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "8",
+        "fields": {
+            "name": "PC Components",
+            "slug": "pc-components",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "9",
+        "fields": {
+            "name": "MacBook",
+            "slug": "macbook",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "10",
+        "fields": {
+            "name": "Shop Laptops by Type",
+            "slug": "shop-laptops-by-type",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "11",
+        "fields": {
+            "name": "Apple MacBook Pro",
+            "slug": "apple-macbook-pro",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "12",
+        "fields": {
+            "name": "MacBooks",
+            "slug": "macbooks",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "13",
+        "fields": {
+            "name": "All Laptops",
+            "slug": "all-laptops",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "14",
+        "fields": {
+            "name": "Notebook Computers",
+            "slug": "notebook-computers",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "15",
+        "fields": {
+            "name": "Computers/Tablets & Networking",
+            "slug": "computers-tablets-and-networking",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "16",
+        "fields": {
+            "name": "Apple",
+            "slug": "apple",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "17",
+        "fields": {
+            "name": "Mac Laptops",
+            "slug": "mac-laptops",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "18",
+        "fields": {
+            "name": "Laptops & Netbooks",
+            "slug": "laptops-and-netbooks",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "19",
+        "fields": {
+            "name": "MacBook Pro",
+            "slug": "macbook-pro",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "20",
+        "fields": {
+            "name": "Traditional Laptops",
+            "slug": "traditional-laptops",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "21",
+        "fields": {
+            "name": "Featured Laptops",
+            "slug": "featured-laptops",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "23",
+        "fields": {
+            "name": "Laptops",
+            "slug": "laptops",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "24",
+        "fields": {
+            "name": "Apple Laptops",
+            "slug": "apple-laptops",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "25",
+        "fields": {
+            "name": "Tablets",
+            "slug": "tablets",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "26",
+        "fields": {
+            "name": "Desktops Workstations",
+            "slug": "desktops-workstations",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "27",
+        "fields": {
+            "name": "Desktop Computers",
+            "slug": "desktop-computers",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "28",
+        "fields": {
+            "name": "Desktop & All-in-One Computers",
+            "slug": "desktop-and-all-in-one-computers",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "29",
+        "fields": {
+            "name": "All Desktops",
+            "slug": "all-desktops",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "30",
+        "fields": {
+            "name": "Desktops",
+            "slug": "desktops",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "31",
+        "fields": {
+            "name": "Towers",
+            "slug": "towers",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "32",
+        "fields": {
+            "name": "Desktops & All-In-Ones",
+            "slug": "desktops-and-all-in-ones",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "33",
+        "fields": {
+            "name": "PC",
+            "slug": "pc",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "34",
+        "fields": {
+            "name": "Computer Accessories & Peripherals",
+            "slug": "computer-accessories-and-peripherals",
+            "is_active": "1"
+        }
+    }
+]
