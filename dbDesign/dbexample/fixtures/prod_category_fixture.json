@@ -295,5 +295,23 @@
             "slug": "computer-accessories-and-peripherals",
             "is_active": "1"
         }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "35",
+        "fields": {
+            "name": "Windows 10 Laptops",
+            "slug": "windows10-laptops",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "36",
+        "fields": {
+            "name": "2-in-1 Laptops",
+            "slug": "2-in-1-laptops",
+            "is_active": "1"
+        }
     }
 ]
