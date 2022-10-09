@@ -313,5 +313,86 @@
             "slug": "2-in-1-laptops",
             "is_active": "1"
         }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "37",
+        "fields": {
+            "name": "Touchscreen Laptops",
+            "slug": "touchscreen-laptops",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "38",
+        "fields": {
+            "name": "Drives Storage",
+            "slug": "drives-storage",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "39",
+        "fields": {
+            "name": "Data Storage Products",
+            "slug": "data-storage-products",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "40",
+        "fields": {
+            "name": "Monitors",
+            "slug": "monitors",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "41",
+        "fields": {
+            "name": "LED Monitors",
+            "slug": "led-monitors",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "42",
+        "fields": {
+            "name": "Lenovo",
+            "slug": "lenovo",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "43",
+        "fields": {
+            "name": "Mice & Keyboards",
+            "slug": "mice--and-keyboards",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "44",
+        "fields": {
+            "name": "Audio & Video Accessories",
+            "slug": "audio-and-video-accessories",
+            "is_active": "1"
+        }
+    },
+    {
+        "model": "dbexample.productcategory",
+        "pk": "45",
+        "fields": {
+            "name": "Microphones & Headsets",
+            "slug": "microphones-and-headsets",
+            "is_active": "1"
+        }
     }
 ]

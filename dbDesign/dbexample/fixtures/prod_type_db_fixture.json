@@ -27,7 +27,7 @@
         "model": "dbexample.producttype",
         "id": "4",
         "fields": {
-            "name": "Peripherals",
+            "name": "Peripherals and Accessories",
             "logo": "some_logo.png"
         }
     }
