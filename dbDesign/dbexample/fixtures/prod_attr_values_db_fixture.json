@@ -1,0 +1,562 @@
+[
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "1",
+        "fields": {
+            "attr": "1",
+            "value": "Intel Core i7"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "2",
+        "fields": {
+            "attr": "1",
+            "value": "Intel Core i5"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "3",
+        "fields": {
+            "attr": "1",
+            "value": "Intel Core i3"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "4",
+        "fields": {
+            "attr": "1",
+            "value": "Intel Pentium"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "5",
+        "fields": {
+            "attr": "1",
+            "value": "Intel Pentium 4405U"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "6",
+        "fields": {
+            "attr": "1",
+            "value": "7th Gen i5-7200U Kaby Lake"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "7",
+        "fields": {
+            "attr": "1",
+            "value": "AMD Ryzen 5"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "8",
+        "fields": {
+            "attr": "2",
+            "value": "128 GB SSD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "9",
+        "fields": {
+            "attr": "2",
+            "value": "256 GB SSD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "10",
+        "fields": {
+            "attr": "2",
+            "value": "250 GB SSD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "11",
+        "fields": {
+            "attr": "2",
+            "value": "320 GB SSD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "12",
+        "fields": {
+            "attr": "2",
+            "value": "512 GB SSD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "13",
+        "fields": {
+            "attr": "2",
+            "value": "1 TB SSD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "14",
+        "fields": {
+            "attr": "2",
+            "value": "128 GB HDD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "15",
+        "fields": {
+            "attr": "2",
+            "value": "256 GB HDD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "16",
+        "fields": {
+            "attr": "2",
+            "value": "320 GB HDD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "17",
+        "fields": {
+            "attr": "2",
+            "value": "512 GB HDD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "18",
+        "fields": {
+            "attr": "2",
+            "value": "1 TB HDD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "19",
+        "fields": {
+            "attr": "2",
+            "value": "2 TB HDD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "20",
+        "fields": {
+            "attr": "2",
+            "value": "3 TB HDD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "21",
+        "fields": {
+            "attr": "2",
+            "value": "5 TB HDD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "22",
+        "fields": {
+            "attr": "3",
+            "value": "2 GB"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "23",
+        "fields": {
+            "attr": "3",
+            "value": "4 GB"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "24",
+        "fields": {
+            "attr": "3",
+            "value": "6 GB"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "25",
+        "fields": {
+            "attr": "3",
+            "value": "8 GB"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "26",
+        "fields": {
+            "attr": "3",
+            "value": "10 GB"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "27",
+        "fields": {
+            "attr": "3",
+            "value": "14 GB"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "28",
+        "fields": {
+            "attr": "3",
+            "value": "16 GB"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "29",
+        "fields": {
+            "attr": "3",
+            "value": "32 GB"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "30",
+        "fields": {
+            "attr": "4",
+            "value": "13.1 Full HD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "31",
+        "fields": {
+            "attr": "4",
+            "value": "13.3 Full HD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "32",
+        "fields": {
+            "attr": "4",
+            "value": "15.6 Full HD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "33",
+        "fields": {
+            "attr": "4",
+            "value": "17.3 Full HD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "34",
+        "fields": {
+            "attr": "4",
+            "value": "13.1 4K Ultra HD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "35",
+        "fields": {
+            "attr": "4",
+            "value": "13.3 4K Ultra HD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "36",
+        "fields": {
+            "attr": "4",
+            "value": "15.6 4K Ultra HD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "37",
+        "fields": {
+            "attr": "4",
+            "value": "17.3 4K Ultra HD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "38",
+        "fields": {
+            "attr": "4",
+            "value": "13.1"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "39",
+        "fields": {
+            "attr": "4",
+            "value": "13.3"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "40",
+        "fields": {
+            "attr": "4",
+            "value": "15.6"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "41",
+        "fields": {
+            "attr": "4",
+            "value": "17.3"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "42",
+        "fields": {
+            "attr": "4",
+            "value": "14.1"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "43",
+        "fields": {
+            "attr": "4",
+            "value": "15.4"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "44",
+        "fields": {
+            "attr": "4",
+            "value": "11.6 Touch-Screen"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "45",
+        "fields": {
+            "attr": "4",
+            "value": "27 Retina 5K"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "46",
+        "fields": {
+            "attr": "4",
+            "value": "13.1 Full HD Touch-Screen"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "47",
+        "fields": {
+            "attr": "4",
+            "value": "13.3 Full HD Touch-Screen"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "48",
+        "fields": {
+            "attr": "4",
+            "value": "15.6 Full HD Touch-Screen"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "49",
+        "fields": {
+            "attr": "4",
+            "value": "17.3 Full HD Touch-Screen"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "50",
+        "fields": {
+            "attr": "4",
+            "value": "13.1 4K Ultra HD Touch-Screen"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "51",
+        "fields": {
+            "attr": "4",
+            "value": "13.3 4K Ultra HD Touch-Screen"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "52",
+        "fields": {
+            "attr": "4",
+            "value": "15.6 4K Ultra HD Touch-Screen"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "53",
+        "fields": {
+            "attr": "4",
+            "value": "17.3 4K Ultra HD Touch-Screen"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "54",
+        "fields": {
+            "attr": "4",
+            "value": "24 IPS LED FHD Touch-Screen"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "55",
+        "fields": {
+            "attr": "4",
+            "value": "23 Touch-Screen"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "56",
+        "fields": {
+            "attr": "5",
+            "value": "Black"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "57",
+        "fields": {
+            "attr": "5",
+            "value": "Red"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "58",
+        "fields": {
+            "attr": "5",
+            "value": "Blue"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "59",
+        "fields": {
+            "attr": "5",
+            "value": "Yellow"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "60",
+        "fields": {
+            "attr": "5",
+            "value": "Green"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "61",
+        "fields": {
+            "attr": "5",
+            "value": "Pink"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "62",
+        "fields": {
+            "attr": "5",
+            "value": "Silver"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "63",
+        "fields": {
+            "attr": "5",
+            "value": "White"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "64",
+        "fields": {
+            "attr": "6",
+            "value": "NVIDIA GeForce GTX 1060"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "66",
+        "fields": {
+            "attr": "6",
+            "value": "NVIDIA GeForce GTX 1080"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "67",
+        "fields": {
+            "attr": "2",
+            "value": "256GB Solid State Drive + 2TB Hard Drive"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "68",
+        "fields": {
+            "attr": "5",
+            "value": "Aluminum Black"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "69",
+        "fields": {
+            "attr": "1",
+            "value": "AMD Ryzen 7"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "70",
+        "fields": {
+            "attr": "4",
+            "value": "14 HD Touch-Screen"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "71",
+        "fields": {
+            "attr": "4",
+            "value": "15.6 HD Touch-Screen"
+        }
+    }
+]

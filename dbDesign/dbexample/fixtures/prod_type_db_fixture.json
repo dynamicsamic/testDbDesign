@@ -1,7 +1,7 @@
 [
     {
         "model": "dbexample.producttype",
-        "id": "1",
+        "pk": "1",
         "fields": {
             "name": "Laptops",
             "logo": "some_logo.png"
@@ -9,7 +9,7 @@
     },
     {
         "model": "dbexample.producttype",
-        "id": "2",
+        "pk": "2",
         "fields": {
             "name": "Desktops",
             "logo": "some_logo.png"
@@ -17,7 +17,7 @@
     },
     {
         "model": "dbexample.producttype",
-        "id": "3",
+        "pk": "3",
         "fields": {
             "name": "Tablets",
             "logo": "some_logo.png"
@@ -25,7 +25,7 @@
     },
     {
         "model": "dbexample.producttype",
-        "id": "4",
+        "pk": "4",
         "fields": {
             "name": "Peripherals and Accessories",
             "logo": "some_logo.png"

@@ -317,7 +317,7 @@ class ProductItem(models.Model):
     _view_count = models.PositiveIntegerField(
         _("number of views"), default=0, help_text="required, starts with 0"
     )
-    made_in = models.CharField(_("change this to country FK"), max_len=150)
+    made_in = models.CharField(_("change this to country FK"), max_length=150)
     created_at = models.DateTimeField(
         _("product item creation time"),
         auto_now_add=True,

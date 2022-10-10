@@ -1,0 +1,226 @@
+[
+    {
+        "model": "dbexample.productitem",
+        "pk": "1",
+        "fields": {
+            "sku": "001202210000001",
+            "product_set": "1031",
+            "attrs": [
+                "40",
+                "1",
+                "28",
+                "67",
+                "68"
+            ],
+            "regular_price": "2300.00",
+            "discount_price": "1899.99",
+            "is_active": "1",
+            "_view_count": "0",
+            "made_in": "China",
+            "created_at": "2017-04-03T19:33:36Z",
+            "updated_at": "2018-06-13T19:13:51Z"
+        }
+    },
+    {
+        "model": "dbexample.productitem",
+        "pk": "2",
+        "fields": {
+            "sku": "001202210000002",
+            "product_set": "1031",
+            "attrs": [
+                "2",
+                "12",
+                "28",
+                "32",
+                "57"
+            ],
+            "regular_price": "2049.99",
+            "discount_price": "1749.99",
+            "is_active": "1",
+            "_view_count": "0",
+            "made_in": "China",
+            "created_at": "2017-04-03T19:33:36Z",
+            "updated_at": "2018-06-13T19:13:51Z"
+        }
+    },
+    {
+        "model": "dbexample.productitem",
+        "pk": "3",
+        "fields": {
+            "sku": "001202210000003",
+            "product_set": "1031",
+            "attrs": [
+                "7",
+                "11",
+                "25",
+                "32",
+                "62"
+            ],
+            "regular_price": "1849.99",
+            "discount_price": "1599.99",
+            "is_active": "1",
+            "_view_count": "0",
+            "made_in": "China",
+            "created_at": "2017-05-06T19:33:36Z",
+            "updated_at": "2018-06-13T19:13:51Z"
+        }
+    },
+    {
+        "model": "dbexample.productitem",
+        "pk": "4",
+        "fields": {
+            "sku": "001202210000004",
+            "product_set": "1420",
+            "attrs": [
+                "1",
+                "13",
+                "29",
+                "66",
+                "53",
+                "56"
+            ],
+            "regular_price": "3149.99",
+            "discount_price": "2749.99",
+            "is_active": "1",
+            "_view_count": "0",
+            "made_in": "Taiwan",
+            "created_at": "2018-05-06T19:33:36Z",
+            "updated_at": "2019-06-13T19:13:51Z"
+        }
+    },
+    {
+        "model": "dbexample.productitem",
+        "pk": "5",
+        "fields": {
+            "sku": "001202210000005",
+            "product_set": "1420",
+            "attrs": [
+                "6",
+                "12",
+                "28",
+                "52",
+                "62",
+                "64"
+            ],
+            "regular_price": "2899.99",
+            "discount_price": "2499.99",
+            "is_active": "1",
+            "_view_count": "0",
+            "made_in": "Taiwan",
+            "created_at": "2018-05-06T19:33:36Z",
+            "updated_at": "2019-06-13T19:13:51Z"
+        }
+    },
+    {
+        "model": "dbexample.productitem",
+        "pk": "6",
+        "fields": {
+            "sku": "001202210000006",
+            "product_set": "1708",
+            "attrs": [
+                "1",
+                "12",
+                "28",
+                "31",
+                "64",
+                "56"
+            ],
+            "regular_price": "1849.99",
+            "discount_price": "1699.99",
+            "is_active": "1",
+            "_view_count": "0",
+            "made_in": "China",
+            "created_at": "2017-07-12T19:33:36Z",
+            "updated_at": "2018-12-13T19:13:51Z"
+        }
+    },
+    {
+        "model": "dbexample.productitem",
+        "pk": "7",
+        "fields": {
+            "sku": "001202210000007",
+            "product_set": "1708",
+            "attrs": [
+                "69",
+                "13",
+                "29",
+                "37",
+                "62",
+                "66"
+            ],
+            "regular_price": "1949.99",
+            "discount_price": "1799.99",
+            "is_active": "1",
+            "_view_count": "0",
+            "made_in": "China",
+            "created_at": "2017-07-12T19:33:36Z",
+            "updated_at": "2018-12-13T19:13:51Z"
+        }
+    },
+    {
+        "model": "dbexample.productitem",
+        "pk": "8",
+        "fields": {
+            "sku": "001202210000008",
+            "product_set": "1734",
+            "attrs": [
+                "70",
+                "5",
+                "23",
+                "17",
+                "56"
+            ],
+            "regular_price": "549.99",
+            "discount_price": "395.99",
+            "is_active": "1",
+            "_view_count": "0",
+            "made_in": "China",
+            "created_at": "2015-12-01T01:18:10Z",
+            "updated_at": "2018-01-03T18:35:44Z"
+        }
+    },
+    {
+        "model": "dbexample.productitem",
+        "pk": "9",
+        "fields": {
+            "sku": "001202210000009",
+            "product_set": "1734",
+            "attrs": [
+                "3",
+                "70",
+                "10",
+                "24",
+                "62"
+            ],
+            "regular_price": "699.99",
+            "discount_price": "499.99",
+            "is_active": "1",
+            "_view_count": "0",
+            "made_in": "China",
+            "created_at": "2015-12-01T01:18:10Z",
+            "updated_at": "2018-01-03T18:35:44Z"
+        }
+    },
+    {
+        "model": "dbexample.productitem",
+        "pk": "10",
+        "fields": {
+            "sku": "001202210000010",
+            "product_set": "2178",
+            "attrs": [
+                "2",
+                "18",
+                "25",
+                "71",
+                "56"
+            ],
+            "regular_price": "799.99",
+            "discount_price": "599.99",
+            "is_active": "1",
+            "_view_count": "0",
+            "made_in": "Taiwan",
+            "created_at": "2017-03-03T16:56:10Z",
+            "updated_at": "2018-01-09T08:04:11Z"
+        }
+    }
+]

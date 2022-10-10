@@ -1,11 +1,11 @@
 [
     {
         "model": "dbexample.productset",
-        "id": "1031",
+        "pk": "1031",
         "fields": {
             "web_id": "103593",
             "slug": "geneic_slug",
-            "name": "MSI - WS Series 15.6 Laptop - Intel Core i7 - 16GB Memory - 256GB Solid State Drive + 2TB Hard Drive - Aluminum Black\"",
+            "name": "MSI - WS Series Laptop",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
             "categories": [
                 "1",
@@ -26,11 +26,11 @@
     },
     {
         "model": "dbexample.productset",
-        "id": "1420",
+        "pk": "1420",
         "fields": {
             "web_id": "104760",
             "slug": "geneic_slug",
-            "name": "Razer - Blade Pro 17.3 4K Ultra HD Touch-Screen Laptop - Intel Core i7 - 32GB Memory - NVIDIA GeForce GTX 1080 - 1TB SSD - Black\"",
+            "name": "Razer - Blade Pro Laptop",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
             "categories": [
                 "15",
@@ -51,11 +51,11 @@
     },
     {
         "model": "dbexample.productset",
-        "id": "1708",
+        "pk": "1708",
         "fields": {
             "web_id": "105624",
             "slug": "geneic_slug",
-            "name": "Details About Alienware 13 R3 Aw13r3/13.3 Fhd/i77700hq/nvidia Gtx 1060/16gb/512gb Ssd\"",
+            "name": "Alienware R3",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
             "categories": [
                 "15",
@@ -76,11 +76,11 @@
     },
     {
         "model": "dbexample.productset",
-        "id": "1734",
+        "pk": "1734",
         "fields": {
             "web_id": "105702",
             "slug": "geneic_slug",
-            "name": "Lenovo Flex 4 1470 80SA0000US 2-in-1 - 14 HD Touch - Pentium 4405U 2.1Ghz - 4GB - 500GB\"",
+            "name": "Lenovo Flex 4",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
             "categories": [
                 "15",
@@ -103,11 +103,11 @@
     },
     {
         "model": "dbexample.productset",
-        "id": "2178",
+        "pk": "2178",
         "fields": {
             "web_id": "107034",
             "slug": "geneic_slug",
-            "name": "HP 15-AY103DX 15.6 Touchscreen Touch Screen HD Laptop Notebook PC Computer 7th Gen i5-7200U Kaby Lake 8GB Memory 1TB HDD Hard Drive Windows 10\"",
+            "name": "HP 15-AY103DX",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
             "categories": [
                 "6",
@@ -121,14 +121,14 @@
             ],
             "p_type": "1",
             "is_active": "True",
-            "brand": "HP",
+            "brand": "7",
             "created_at": "2017-03-03T16:56:10Z",
             "updated_at": "2018-01-09T08:04:11Z"
         }
     },
     {
         "model": "dbexample.productset",
-        "id": "1192",
+        "pk": "1192",
         "fields": {
             "web_id": "104076",
             "slug": "geneic_slug",
@@ -155,7 +155,7 @@
     },
     {
         "model": "dbexample.productset",
-        "id": "1379",
+        "pk": "1379",
         "fields": {
             "web_id": "104637",
             "slug": "geneic_slug",
@@ -180,7 +180,7 @@
     },
     {
         "model": "dbexample.productset",
-        "id": "2562",
+        "pk": "2562",
         "fields": {
             "web_id": "108186",
             "slug": "geneic_slug",
@@ -210,7 +210,7 @@
     },
     {
         "model": "dbexample.productset",
-        "id": "566",
+        "pk": "566",
         "fields": {
             "web_id": "102198",
             "slug": "geneic_slug",
@@ -235,7 +235,7 @@
     },
     {
         "model": "dbexample.productset",
-        "id": "588",
+        "pk": "588",
         "fields": {
             "web_id": "102264",
             "slug": "geneic_slug",
@@ -264,7 +264,7 @@
     },
     {
         "model": "dbexample.productset",
-        "id": "324",
+        "pk": "324",
         "fields": {
             "web_id": "101472",
             "slug": "geneic_slug",
@@ -286,7 +286,7 @@
     },
     {
         "model": "dbexample.productset",
-        "id": "586",
+        "pk": "586",
         "fields": {
             "web_id": "102258",
             "slug": "geneic_slug",
@@ -316,7 +316,7 @@
     },
     {
         "model": "dbexample.productset",
-        "id": "1035",
+        "pk": "1035",
         "fields": {
             "web_id": "103605",
             "slug": "geneic_slug",
@@ -343,7 +343,7 @@
     },
     {
         "model": "dbexample.productset",
-        "id": "3023",
+        "pk": "3023",
         "fields": {
             "web_id": "109569",
             "slug": "geneic_slug",
@@ -374,7 +374,7 @@
     },
     {
         "model": "dbexample.productset",
-        "id": "3258",
+        "pk": "3258",
         "fields": {
             "web_id": "110274",
             "slug": "geneic_slug",
@@ -408,7 +408,7 @@
     },
     {
         "model": "dbexample.productset",
-        "id": "1539",
+        "pk": "1539",
         "fields": {
             "web_id": "105117",
             "slug": "geneic_slug",
@@ -435,7 +435,7 @@
     },
     {
         "model": "dbexample.productset",
-        "id": "2987",
+        "pk": "2987",
         "fields": {
             "web_id": "109461",
             "slug": "geneic_slug",
@@ -461,7 +461,7 @@
     },
     {
         "model": "dbexample.productset",
-        "id": "2415",
+        "pk": "2415",
         "fields": {
             "web_id": "107745",
             "slug": "geneic_slug",
@@ -486,7 +486,7 @@
     },
     {
         "model": "dbexample.productset",
-        "id": "1265",
+        "pk": "1265",
         "fields": {
             "web_id": "104295",
             "slug": "geneic_slug",

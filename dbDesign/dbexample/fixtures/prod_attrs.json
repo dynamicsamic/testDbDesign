@@ -1,9 +1,0 @@
-[
-    {
-        "model": "dbexample.productattribute",
-        "id": "1",
-        "fields": {
-            "name": "cpu"
-        }
-    }
-]

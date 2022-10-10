@@ -1,0 +1,44 @@
+[
+    {
+        "model": "dbexample.productattribute",
+        "pk": "1",
+        "fields": {
+            "name": "cpu"
+        }
+    },
+    {
+        "model": "dbexample.productattribute",
+        "pk": "2",
+        "fields": {
+            "name": "storage"
+        }
+    },
+    {
+        "model": "dbexample.productattribute",
+        "pk": "3",
+        "fields": {
+            "name": "RAM"
+        }
+    },
+    {
+        "model": "dbexample.productattribute",
+        "pk": "4",
+        "fields": {
+            "name": "display"
+        }
+    },
+    {
+        "model": "dbexample.productattribute",
+        "pk": "5",
+        "fields": {
+            "name": "color"
+        }
+    },
+    {
+        "model": "dbexample.productattribute",
+        "pk": "6",
+        "fields": {
+            "name": "graphics"
+        }
+    }
+]

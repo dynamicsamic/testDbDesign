@@ -1,7 +1,7 @@
 [
     {
-        "model": "dbexample.supplier",
-        "id": "1",
+        "model": "dbexample.brand",
+        "pk": "1",
         "fields": {
             "name": "Dell",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
@@ -10,8 +10,8 @@
         }
     },
     {
-        "model": "dbexample.supplier",
-        "id": "2",
+        "model": "dbexample.brand",
+        "pk": "2",
         "fields": {
             "name": "Samsung",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
@@ -20,8 +20,8 @@
         }
     },
     {
-        "model": "dbexample.supplier",
-        "id": "3",
+        "model": "dbexample.brand",
+        "pk": "3",
         "fields": {
             "name": "Asus",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
@@ -30,8 +30,8 @@
         }
     },
     {
-        "model": "dbexample.supplier",
-        "id": "4",
+        "model": "dbexample.brand",
+        "pk": "4",
         "fields": {
             "name": "Apple",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
@@ -40,8 +40,8 @@
         }
     },
     {
-        "model": "dbexample.supplier",
-        "id": "5",
+        "model": "dbexample.brand",
+        "pk": "5",
         "fields": {
             "name": "Acer",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
@@ -50,8 +50,8 @@
         }
     },
     {
-        "model": "dbexample.supplier",
-        "id": "6",
+        "model": "dbexample.brand",
+        "pk": "6",
         "fields": {
             "name": "Lenovo",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
@@ -60,8 +60,8 @@
         }
     },
     {
-        "model": "dbexample.supplier",
-        "id": "7",
+        "model": "dbexample.brand",
+        "pk": "7",
         "fields": {
             "name": "HP",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
@@ -70,8 +70,8 @@
         }
     },
     {
-        "model": "dbexample.supplier",
-        "id": "8",
+        "model": "dbexample.brand",
+        "pk": "8",
         "fields": {
             "name": "Huawei",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
@@ -80,8 +80,8 @@
         }
     },
     {
-        "model": "dbexample.supplier",
-        "id": "19",
+        "model": "dbexample.brand",
+        "pk": "19",
         "fields": {
             "name": "Honor",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
@@ -90,8 +90,8 @@
         }
     },
     {
-        "model": "dbexample.supplier",
-        "id": "9",
+        "model": "dbexample.brand",
+        "pk": "9",
         "fields": {
             "name": "Xiaomi",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
@@ -100,8 +100,8 @@
         }
     },
     {
-        "model": "dbexample.supplier",
-        "id": "10",
+        "model": "dbexample.brand",
+        "pk": "10",
         "fields": {
             "name": "NEC",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
@@ -110,8 +110,8 @@
         }
     },
     {
-        "model": "dbexample.supplier",
-        "id": "11",
+        "model": "dbexample.brand",
+        "pk": "11",
         "fields": {
             "name": "Toshiba",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
@@ -120,8 +120,8 @@
         }
     },
     {
-        "model": "dbexample.supplier",
-        "id": "12",
+        "model": "dbexample.brand",
+        "pk": "12",
         "fields": {
             "name": "IBM",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
@@ -130,8 +130,8 @@
         }
     },
     {
-        "model": "dbexample.supplier",
-        "id": "13",
+        "model": "dbexample.brand",
+        "pk": "13",
         "fields": {
             "name": "Fujitsu",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
@@ -140,8 +140,8 @@
         }
     },
     {
-        "model": "dbexample.supplier",
-        "id": "14",
+        "model": "dbexample.brand",
+        "pk": "14",
         "fields": {
             "name": "Microsoft",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
@@ -150,8 +150,8 @@
         }
     },
     {
-        "model": "dbexample.supplier",
-        "id": "20",
+        "model": "dbexample.brand",
+        "pk": "20",
         "fields": {
             "name": "XBox",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
@@ -160,8 +160,8 @@
         }
     },
     {
-        "model": "dbexample.supplier",
-        "id": "15",
+        "model": "dbexample.brand",
+        "pk": "15",
         "fields": {
             "name": "MSI",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
@@ -170,8 +170,8 @@
         }
     },
     {
-        "model": "dbexample.supplier",
-        "id": "16",
+        "model": "dbexample.brand",
+        "pk": "16",
         "fields": {
             "name": "LG",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
@@ -180,8 +180,8 @@
         }
     },
     {
-        "model": "dbexample.supplier",
-        "id": "17",
+        "model": "dbexample.brand",
+        "pk": "17",
         "fields": {
             "name": "Alienware",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
@@ -190,8 +190,8 @@
         }
     },
     {
-        "model": "dbexample.supplier",
-        "id": "18",
+        "model": "dbexample.brand",
+        "pk": "18",
         "fields": {
             "name": "Razer",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
