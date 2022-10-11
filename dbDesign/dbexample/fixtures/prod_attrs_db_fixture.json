@@ -40,5 +40,33 @@
         "fields": {
             "name": "graphics"
         }
+    },
+    {
+        "model": "dbexample.productattribute",
+        "pk": "7",
+        "fields": {
+            "name": "capacity"
+        }
+    },
+    {
+        "model": "dbexample.productattribute",
+        "pk": "8",
+        "fields": {
+            "name": "interface"
+        }
+    },
+    {
+        "model": "dbexample.productattribute",
+        "pk": "9",
+        "fields": {
+            "name": "form-factor"
+        }
+    },
+    {
+        "model": "dbexample.productattribute",
+        "pk": "10",
+        "fields": {
+            "name": "memory-type"
+        }
     }
 ]

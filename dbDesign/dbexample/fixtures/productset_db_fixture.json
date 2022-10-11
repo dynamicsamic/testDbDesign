@@ -5,7 +5,7 @@
         "fields": {
             "web_id": "103593",
             "slug": "geneic_slug",
-            "name": "MSI - WS Series Laptop",
+            "name": "MSI WS Series Laptop",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
             "categories": [
                 "1",
@@ -30,7 +30,7 @@
         "fields": {
             "web_id": "104760",
             "slug": "geneic_slug",
-            "name": "Razer - Blade Pro Laptop",
+            "name": "Razer Blade Pro Laptop",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
             "categories": [
                 "15",
@@ -132,7 +132,7 @@
         "fields": {
             "web_id": "104076",
             "slug": "geneic_slug",
-            "name": "Samsung - 960 EVO 500GB Internal PCI Express 3.0 x4 (NVMe) Solid State Drive for Laptops",
+            "name": "Samsung - 960 EVO Solid State Drive for Laptops",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
             "categories": [
                 "1",
@@ -159,7 +159,7 @@
         "fields": {
             "web_id": "104637",
             "slug": "geneic_slug",
-            "name": "MSI - 15.6 Laptop - Intel Core i7 - 16GB Memory - NVIDIA GeForce GTX 1060 - 1TB Hard Drive + 256GB Solid State Drive - Black\"",
+            "name": "MSI 15.6 Laptop",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
             "categories": [
                 "1",
@@ -184,7 +184,7 @@
         "fields": {
             "web_id": "108186",
             "slug": "geneic_slug",
-            "name": "Dell - XPS 2-in-1 13.3 Touch-Screen Laptop - Intel Core i7 - 16GB Memory - 256GB Solid State Drive - Silver\"",
+            "name": "Dell XPS 2-in-1 Laptop",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
             "categories": [
                 "1",
@@ -290,7 +290,7 @@
         "fields": {
             "web_id": "102258",
             "slug": "geneic_slug",
-            "name": "Lenovo - 300-20ISH 20 All-In-One - Intel Pentium - 4GB Memory - 500GB Hard Drive - Black\"",
+            "name": "Lenovo 300-20ISH All-In-One ",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
             "categories": [
                 "42",
@@ -320,7 +320,7 @@
         "fields": {
             "web_id": "103605",
             "slug": "geneic_slug",
-            "name": "Lenovo - 510-23ISH 23 Touch-Screen All-In-One - Intel Core i5 - 8GB Memory - 2TB Hard Drive - Black\"",
+            "name": "Lenovo 510-23ISH All-In-One",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
             "categories": [
                 "1",
@@ -347,7 +347,7 @@
         "fields": {
             "web_id": "109569",
             "slug": "geneic_slug",
-            "name": "Lenovo - Yoga 710 2-in-1 11.6 Touch-Screen Laptop - Intel Core i5 - 8GB Memory - 128GB Solid State Drive - Silver Tablet PC Notebook 80V6000PUS\"",
+            "name": "Lenovo Yoga 710 2-in-1 Laptop",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
             "categories": [
                 "1",
@@ -378,7 +378,7 @@
         "fields": {
             "web_id": "110274",
             "slug": "geneic_slug",
-            "name": "15.4 MacBook Pro with Touch Bar (Late 2016, Space Gray)",
+            "name": "15.4 MacBook Pro",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
             "categories": [
                 "1",
@@ -431,32 +431,6 @@
             "brand": "4",
             "created_at": "2017-07-12T16:00:33Z",
             "updated_at": "2018-06-21T21:33:10Z"
-        }
-    },
-    {
-        "model": "dbexample.productset",
-        "pk": "2987",
-        "fields": {
-            "web_id": "109461",
-            "slug": "geneic_slug",
-            "name": "Samsung - 960 EVO 250GB Internal PCI Express 3.0 x4 (NVMe) Solid State Drive for Laptops",
-            "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "categories": [
-                "1",
-                "2",
-                "3",
-                "4",
-                "6",
-                "8",
-                "34",
-                "38",
-                "39"
-            ],
-            "p_type": "4",
-            "is_active": "True",
-            "brand": "2",
-            "created_at": "2016-12-12T23:38:26Z",
-            "updated_at": "2018-06-13T19:38:51Z"
         }
     },
     {

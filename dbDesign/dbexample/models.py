@@ -98,7 +98,7 @@ class Supplier(Agent):
     pass
 
 
-class Producer(models.Model):
+class Vendor(models.Model):
     name = models.CharField(
         _("manufacturer name"),
         max_length=150,
@@ -106,7 +106,7 @@ class Producer(models.Model):
         help_text=_("required, max_len: 150"),
     )
     description = models.TextField(
-        _("producer brief info"),
+        _("product vendor brief info"),
         max_length=2000,
         blank=True,
         null=True,
@@ -129,8 +129,8 @@ class Brand(models.Model):
         help_text=_("optional, max_len: 2000"),
     )
     logo = models.CharField(_("replace this to imagefield"), max_length=30)
-    producer = models.ForeignKey(
-        Producer,
+    vendor = models.ForeignKey(
+        Vendor,
         related_name="brands",
         on_delete=models.SET_NULL,
         blank=True,

@@ -558,5 +558,181 @@
             "attr": "4",
             "value": "15.6 HD Touch-Screen"
         }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "72",
+        "fields": {
+            "attr": "2",
+            "value": "256GB Solid State Drive + 1TB Hard Drive"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "73",
+        "fields": {
+            "attr": "6",
+            "value": "NVIDIA GeForce GTX 1070 (8GB)"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "74",
+        "fields": {
+            "attr": "4",
+            "value": "24 LCD Display"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "75",
+        "fields": {
+            "attr": "6",
+            "value": "NVIDIA GeForce GTX 1070 (4GB)"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "76",
+        "fields": {
+            "attr": "4",
+            "value": "20 LCD Display"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "77",
+        "fields": {
+            "attr": "4",
+            "value": "23 HD Touch-Screen"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "78",
+        "fields": {
+            "attr": "6",
+            "value": "NVIDIA GeForce 940MX"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "79",
+        "fields": {
+            "attr": "4",
+            "value": "15.4 FHD Retina IPS"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "80",
+        "fields": {
+            "attr": "5",
+            "value": "Space Gray"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "81",
+        "fields": {
+            "attr": "6",
+            "value": "AMD Radeon Pro 450 (4GB)"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "82",
+        "fields": {
+            "attr": "6",
+            "value": "AMD Radeon Pro 450 (2GB)"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "83",
+        "fields": {
+            "attr": "6",
+            "value": "AMD Radeon 5500XT (8GB)"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "84",
+        "fields": {
+            "attr": "6",
+            "value": "AMD Radeon 5300 (4GB)"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "85",
+        "fields": {
+            "attr": "4",
+            "value": "27 5K Retina"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "86",
+        "fields": {
+            "attr": "10",
+            "value": "SSD"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "89",
+        "fields": {
+            "attr": "8",
+            "value": "PCI Express 3.0 x4"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "87",
+        "fields": {
+            "attr": "7",
+            "value": "500 GB"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "88",
+        "fields": {
+            "attr": "9",
+            "value": "2.5"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "90",
+        "fields": {
+            "attr": "7",
+            "value": "320 GB"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "91",
+        "fields": {
+            "attr": "7",
+            "value": "3 TB"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "92",
+        "fields": {
+            "attr": "8",
+            "value": "SATA 3"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "93",
+        "fields": {
+            "attr": "10",
+            "value": "HDD"
+        }
     }
 ]
