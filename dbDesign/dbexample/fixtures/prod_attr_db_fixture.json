@@ -68,5 +68,33 @@
         "fields": {
             "name": "memory-type"
         }
+    },
+    {
+        "model": "dbexample.productattribute",
+        "pk": "11",
+        "fields": {
+            "name": "key-switch-type"
+        }
+    },
+    {
+        "model": "dbexample.productattribute",
+        "pk": "12",
+        "fields": {
+            "name": "screen-size"
+        }
+    },
+    {
+        "model": "dbexample.productattribute",
+        "pk": "13",
+        "fields": {
+            "name": "touchscreen-type"
+        }
+    },
+    {
+        "model": "dbexample.productattribute",
+        "pk": "14",
+        "fields": {
+            "name": "display-type"
+        }
     }
 ]

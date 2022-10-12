@@ -5,7 +5,7 @@
         "fields": {
             "name": "Dell",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "producer": "1",
+            "vendor": "1",
             "logo": "some_logo.png"
         }
     },
@@ -15,7 +15,7 @@
         "fields": {
             "name": "Samsung",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "producer": "2",
+            "vendor": "2",
             "logo": "some_logo.png"
         }
     },
@@ -25,7 +25,7 @@
         "fields": {
             "name": "Asus",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "producer": "3",
+            "vendor": "3",
             "logo": "some_logo.png"
         }
     },
@@ -35,7 +35,7 @@
         "fields": {
             "name": "Apple",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "producer": "4",
+            "vendor": "4",
             "logo": "some_logo.png"
         }
     },
@@ -45,7 +45,7 @@
         "fields": {
             "name": "Acer",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "producer": "5",
+            "vendor": "5",
             "logo": "some_logo.png"
         }
     },
@@ -55,7 +55,7 @@
         "fields": {
             "name": "Lenovo",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "producer": "6",
+            "vendor": "6",
             "logo": "some_logo.png"
         }
     },
@@ -65,7 +65,7 @@
         "fields": {
             "name": "HP",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "producer": "7",
+            "vendor": "7",
             "logo": "some_logo.png"
         }
     },
@@ -75,7 +75,7 @@
         "fields": {
             "name": "Huawei",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "producer": "8",
+            "vendor": "8",
             "logo": "some_logo.png"
         }
     },
@@ -85,7 +85,7 @@
         "fields": {
             "name": "Honor",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "producer": "8",
+            "vendor": "8",
             "logo": "some_logo.png"
         }
     },
@@ -95,7 +95,7 @@
         "fields": {
             "name": "Xiaomi",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "producer": "9",
+            "vendor": "9",
             "logo": "some_logo.png"
         }
     },
@@ -105,7 +105,7 @@
         "fields": {
             "name": "NEC",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "producer": "10",
+            "vendor": "10",
             "logo": "some_logo.png"
         }
     },
@@ -115,7 +115,7 @@
         "fields": {
             "name": "Toshiba",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "producer": "11",
+            "vendor": "11",
             "logo": "some_logo.png"
         }
     },
@@ -125,7 +125,7 @@
         "fields": {
             "name": "IBM",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "producer": "12",
+            "vendor": "12",
             "logo": "some_logo.png"
         }
     },
@@ -135,7 +135,7 @@
         "fields": {
             "name": "Fujitsu",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "producer": "13",
+            "vendor": "13",
             "logo": "some_logo.png"
         }
     },
@@ -145,7 +145,7 @@
         "fields": {
             "name": "Microsoft",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "producer": "14",
+            "vendor": "14",
             "logo": "some_logo.png"
         }
     },
@@ -155,7 +155,7 @@
         "fields": {
             "name": "XBox",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "producer": "14",
+            "vendor": "14",
             "logo": "some_logo.png"
         }
     },
@@ -165,7 +165,7 @@
         "fields": {
             "name": "MSI",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "producer": "15",
+            "vendor": "15",
             "logo": "some_logo.png"
         }
     },
@@ -175,7 +175,7 @@
         "fields": {
             "name": "LG",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "producer": 16,
+            "vendor": 16,
             "logo": "some_logo.png"
         }
     },
@@ -185,7 +185,7 @@
         "fields": {
             "name": "Alienware",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "producer": "1",
+            "vendor": "1",
             "logo": "some_logo.png"
         }
     },
@@ -195,7 +195,7 @@
         "fields": {
             "name": "Razer",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
-            "producer": "17",
+            "vendor": "17",
             "logo": "some_logo.png"
         }
     }

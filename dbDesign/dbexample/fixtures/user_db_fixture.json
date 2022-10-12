@@ -1,0 +1,20 @@
+[
+    {
+        "model": "dbexample.user",
+        "pk": "1",
+        "fields": {
+            "username": "regular_user_1",
+            "email": "regular_user_1@hello,py",
+            "password": "Generic_psswrd"
+        }
+    },
+    {
+        "model": "dbexample.user",
+        "pk": "2",
+        "fields": {
+            "username": "regular_user_2",
+            "email": "regular_user_2@hello,py",
+            "password": "Generic_psswrd"
+        }
+    }
+]

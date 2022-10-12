@@ -734,5 +734,45 @@
             "attr": "10",
             "value": "HDD"
         }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "94",
+        "fields": {
+            "attr": "8",
+            "value": "USB 2.0"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "95",
+        "fields": {
+            "attr": "11",
+            "value": "Membrane"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "96",
+        "fields": {
+            "attr": "12",
+            "value": "24"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "97",
+        "fields": {
+            "attr": "13",
+            "value": "10-point touch"
+        }
+    },
+    {
+        "model": "dbexample.productattributevalue",
+        "pk": "98",
+        "fields": {
+            "attr": "14",
+            "value": "Full HD"
+        }
     }
 ]

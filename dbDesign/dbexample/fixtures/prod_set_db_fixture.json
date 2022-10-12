@@ -214,7 +214,7 @@
         "fields": {
             "web_id": "102198",
             "slug": "geneic_slug",
-            "name": "Dell - P2418HT 24 IPS LED FHD Touch-Screen Monitor - Black\"",
+            "name": "Dell P2418HT IPS LED FHD Touch-Screen Monitor",
             "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque ultricies condimentum augue, sit amet tempor leo iaculis et. Nam turpis.",
             "categories": [
                 "40",
@@ -478,7 +478,7 @@
                 "45"
             ],
             "p_type": "4",
-            "is_active": "True",
+            "is_active": "False",
             "brand": "18",
             "created_at": "2017-03-03T16:55:29Z",
             "updated_at": "2018-06-20T13:14:28Z"

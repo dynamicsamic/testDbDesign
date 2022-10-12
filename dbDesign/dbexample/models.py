@@ -1,44 +1,42 @@
+from django.conf import settings
+from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.db.models.manager import Manager
 from django.utils.translation import gettext_lazy as _
 
 
-class ManagerAutoIncrementViewCount(Manager):
-    def get(self, *args, **kwargs):
-        if result := super().get(*args, **kwargs):
-            result.views += 1
-            result.save()
-            return result
+class BaseUser(AbstractUser):
+    email = models.EmailField(_("email adress"), unique=True)
+
+    class Meta:
+        abstract = True
 
 
-class ViewsCountAutoIncrementMixin:
-    def get(self, *args, **kwargs):
-        if result := super().get(*args, **kwargs):
-            if not hasattr(result, "view_count"):
-                raise AttributeError(
-                    _(
-                        f"Instance {result.__class__.__name__} should have `view_count` attribute"
-                    )
-                )
-            result.view_count += 1
-            result.save()
-            return result
+class User(BaseUser):
+    pass
 
-    def get_or_create(self, defaults=None, **kwargs):
-        result = super().get_or_create(defaults, **kwargs)
-        obj, created = result
-        if not created:
-            if not hasattr(result, "view_count"):
-                raise AttributeError(
-                    _(
-                        f"Instance {result.__class__.__name__} should have `view_count` attribute"
-                    )
-                )
-            obj.view_count += 1
-            obj.save()
-            obj.refresh_from_db()
-            return obj, created
-        return result
+
+class Customer(models.Model):
+    class CustomManager(models.Manager):
+        def get_queryset(self):
+            """Fetch user data when querying for customer."""
+            queryset = super().get_queryset()
+            return queryset.select_related("user")
+
+    objects = CustomManager()
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        related_name="customer",
+        on_delete=models.CASCADE,
+    )
+
+
+class Employee(models.Model):
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        related_name="employee",
+        on_delete=models.CASCADE,
+    )
 
 
 '''
@@ -149,6 +147,9 @@ class ProductType(models.Model):
         help_text=_("required, max_len: 150"),
     )
     logo = models.CharField(_("replace this to imagefield"), max_length=30)
+
+    # maybe add an `attribute_collection (attr_set)` M2M field to have all
+    # product attributes predefined before creation of a product_item
 
     def __str__(self):
         return self.name
@@ -276,10 +277,6 @@ class ProductAttributeValue(models.Model):
 class ProductItem(models.Model):
     """Particular item of product with specific attributes."""
 
-    # class CustomManager(ViewsCountAutoIncrementMixin, Manager):
-    #    pass
-
-    # objects = CustomManager()
     sku = models.CharField(
         _("stock keeping unit"),
         max_length=20,
@@ -347,6 +344,7 @@ class ProductToAttributeLinkTable(models.Model):
     product_item = models.ForeignKey(ProductItem, on_delete=models.PROTECT)
     attr_values = models.ForeignKey(
         ProductAttributeValue,
+        related_name="prod_items",
         on_delete=models.PROTECT,
     )
 
@@ -416,6 +414,40 @@ class Stock(models.Model):
 
     def subtract(self, value: int):
         self.current_amount -= value
+
+
+class Order(models.Model):
+    user = models.ForeignKey(
+        Customer, related_name="orders", on_delete=models.PROTECT
+    )  # change to models.SET_DEFAULT
+    products = models.ManyToManyField(ProductItem, related_name="orders")
+    created_at = models.DateTimeField(
+        _("order creation time"),
+        auto_now_add=True,
+        help_text=_("format: Y-m-d H:M:S"),
+    )
+    updated_at = models.DateTimeField(
+        _("order last update time"),
+        auto_now=True,
+        help_text=_("format: Y-m-d H:M:S"),
+    )
+    # status = ...
+    # shipment_method = ...
+    # payment_method = ...
+    total_sum = models.PositiveIntegerField(
+        _("order sum without discounts"),
+        help_text=_("required, positive number"),
+    )
+    total_discount = models.PositiveIntegerField(
+        _("sum of discounts"),
+        blank=True,
+        null=True,
+        help_text=_("optional, positive number"),
+    )
+    final_sum = models.PositiveIntegerField(
+        _("order sum with discounts"), help_text=_("required, positive number")
+    )
+    # delivery_info = ...  # FK DELIVERY
 
 
 class Comment(models.Model):

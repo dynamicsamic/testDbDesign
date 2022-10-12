@@ -1,0 +1,16 @@
+[
+    {
+        "model": "dbexample.customer",
+        "pk": "1",
+        "fields": {
+            "user": "1"
+        }
+    },
+    {
+        "model": "dbexample.customer",
+        "pk": "2",
+        "fields": {
+            "user": "2"
+        }
+    }
+]
