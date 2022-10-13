@@ -1,7 +1,21 @@
+import datetime as dt
+
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models.query import QuerySet
 from django.utils.translation import gettext_lazy as _
+
+
+class SelectRelatedManager(models.Manager):
+    def __init__(self, select_related_model_name: str) -> None:
+        super().__init__()
+        self.select_related_model_name = select_related_model_name
+
+    def get_queryset(self) -> QuerySet:
+        """Join related object's data when to main query."""
+        queryset = super().get_queryset()
+        return queryset.select_related(self.select_related_model_name)
 
 
 class BaseUser(AbstractUser):
@@ -15,20 +29,82 @@ class User(BaseUser):
     pass
 
 
+class Mixin:
+    def create(self, *args, **kwargs):
+        obj = super().create(args, kwargs)
+        Cart.objects.create(customer=obj)
+        return obj
+
+
 class Customer(models.Model):
-    class CustomManager(models.Manager):
-        def get_queryset(self):
-            """Fetch user data when querying for customer."""
-            queryset = super().get_queryset()
-            return queryset.select_related("user")
+    class Man(models.Manager):
+        def create(self, *args, **kwargs):
+            obj = super().create(*args, **kwargs)
+            Cart.objects.create(customer=obj)
+            return obj
 
-    objects = CustomManager()
-
+    # objects = SelectRelatedManager("user")
+    objects = Man()
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         related_name="customer",
         on_delete=models.CASCADE,
     )
+
+    @property
+    def username(self) -> str:
+        return self.user.get_username()
+
+    @property
+    def email(self) -> str:
+        return self.user.email
+
+    @email.setter
+    def email(self, new_email: str) -> None:
+        self.user.email = new_email
+
+    @property
+    def first_name(self) -> str:
+        return self.user.first_name
+
+    @first_name.setter
+    def first_name(self, new_first_name: str) -> None:
+        self.user.first_name = new_first_name
+
+    @property
+    def last_name(self) -> str:
+        return self.user.last_name
+
+    @last_name.setter
+    def last_name(self, new_last_name: str) -> None:
+        self.user.last_name = new_last_name
+
+    @property
+    def full_name(self) -> str:
+        return self.user.get_full_name()
+
+    @property
+    def last_login(self) -> dt.datetime or None:
+        return self.user.last_login
+
+    @property
+    def date_joined(self) -> dt.datetime:
+        return self.user.date_joined
+
+    @property
+    def is_anonymous(self) -> bool:
+        return self.user.is_anonymous
+
+    @property
+    def is_authenticated(self) -> bool:
+        return self.user.is_authenticated
+
+    @property
+    def groups(self):
+        return self.user.groups
+
+    def __str__(self) -> str:
+        return self.username
 
 
 class Employee(models.Model):
@@ -248,6 +324,10 @@ class ProductSet(models.Model):
 
 
 class ProductAttribute(models.Model):
+    """Attribute of a product.
+    Like `cpu`, `storage`, `RAM` etc.
+    """
+
     name = models.CharField(
         _("product item attribute name"),
         max_length=150,
@@ -260,6 +340,10 @@ class ProductAttribute(models.Model):
 
 
 class ProductAttributeValue(models.Model):
+    """Value of a product attribute."""
+
+    objects = SelectRelatedManager("attr")
+
     attr = models.ForeignKey(
         ProductAttribute, related_name="values", on_delete=models.PROTECT
     )
@@ -414,6 +498,40 @@ class Stock(models.Model):
 
     def subtract(self, value: int):
         self.current_amount -= value
+
+
+class Cart(models.Model):
+    class CartStatus(models.TextChoices):
+        EMPTY = "empty"
+        IN_PROGRESS = "in_progress"
+
+    customer = models.OneToOneField(
+        Customer,
+        related_name="cart",
+        on_delete=models.PROTECT,
+        verbose_name=_("Cutomer"),
+        help_text="required, customer instance",
+    )
+    status = models.CharField(
+        _("Cart status"),
+        max_length=20,
+        choices=CartStatus.choices,
+        default=CartStatus.EMPTY,
+        help_text=_("required, default: empty"),
+    )
+    created_at = models.DateTimeField(
+        _("cart creation time"),
+        auto_now_add=True,
+        help_text=_("format: Y-m-d H:M:S"),
+    )
+    updated_at = models.DateTimeField(
+        _("cart last update time"),
+        auto_now=True,
+        help_text=_("format: Y-m-d H:M:S"),
+    )
+
+    def __str__(self) -> str:
+        return self.customer.username
 
 
 class Order(models.Model):
