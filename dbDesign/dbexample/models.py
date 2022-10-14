@@ -13,9 +13,17 @@ class SelectRelatedManager(models.Manager):
         self.select_related_model_name = select_related_model_name
 
     def get_queryset(self) -> QuerySet:
-        """Join related object's data when to main query."""
+        """Join related object's data to main queryset."""
         queryset = super().get_queryset()
         return queryset.select_related(self.select_related_model_name)
+
+
+class CustomerManager(SelectRelatedManager):
+    def create(self, **kwargs):
+        """Create an empty cart when creating a customer."""
+        customer = super().create(**kwargs)
+        Cart.objects.create(customer=customer)
+        return customer
 
 
 class BaseUser(AbstractUser):
@@ -29,26 +37,18 @@ class User(BaseUser):
     pass
 
 
-class Mixin:
-    def create(self, *args, **kwargs):
-        obj = super().create(args, kwargs)
-        Cart.objects.create(customer=obj)
-        return obj
-
-
 class Customer(models.Model):
-    class Man(models.Manager):
-        def create(self, *args, **kwargs):
-            obj = super().create(*args, **kwargs)
-            Cart.objects.create(customer=obj)
-            return obj
+    objects = CustomerManager("user")
 
-    # objects = SelectRelatedManager("user")
-    objects = Man()
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         related_name="customer",
         on_delete=models.CASCADE,
+    )
+    phone_number = models.CharField(
+        _("Customer phone number"),
+        max_length=15,
+        help_text=_("required, max_len: 15"),
     )
 
     @property
@@ -532,6 +532,18 @@ class Cart(models.Model):
 
     def __str__(self) -> str:
         return self.customer.username
+
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(
+        Cart,
+        related_name="items",
+        on_delete=models.CASCADE,
+        verbose_name="Item in cart",
+    )
+    product = models.ForeignKey(
+        ProductItem, on_delete=models.PROTECT, verbose_name=_("Product item")
+    )
 
 
 class Order(models.Model):
