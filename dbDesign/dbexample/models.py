@@ -2,6 +2,7 @@ import datetime as dt
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.translation import gettext_lazy as _
@@ -501,6 +502,7 @@ class Stock(models.Model):
 
 
 class Cart(models.Model):
+    # maybe try: Cart.objects.select_related('customer)?
     class CartStatus(models.TextChoices):
         EMPTY = "empty"
         IN_PROGRESS = "in_progress"
@@ -530,8 +532,11 @@ class Cart(models.Model):
         help_text=_("format: Y-m-d H:M:S"),
     )
 
+    def clear_out(self):
+        self.items.all().delete()
+
     def __str__(self) -> str:
-        return self.customer.username
+        return self.customer_id
 
 
 class CartItem(models.Model):
@@ -544,6 +549,39 @@ class CartItem(models.Model):
     product = models.ForeignKey(
         ProductItem, on_delete=models.PROTECT, verbose_name=_("Product item")
     )
+    _quantity = models.PositiveIntegerField(
+        _("Product quantity"),
+        validators=[MinValueValidator(1)],
+        help_text=_("reqiured, positive integer"),
+        default=1,
+    )
+    created_at = models.DateTimeField(
+        _("cart_item creation time"),
+        auto_now_add=True,
+        help_text=_("format: Y-m-d H:M:S"),
+    )
+    updated_at = models.DateTimeField(
+        _("cart_item last update time"),
+        auto_now=True,
+        help_text=_("format: Y-m-d H:M:S"),
+    )
+
+    def add_quantity(self, quantity: int) -> None:
+        self._quantity += quantity
+        self.save()
+
+    # view behavior:
+    # def add_cart_item(request, prod_id, cart_id, quantity=1):
+    #   from django.utils.timezone import now
+    #   try:
+    #       cart_item, created = CartItem.objects.get_or_create(cart_id=cart_id, product_id=product_id)
+    #       if created:
+    #         cart_item.add_quantity(quantity)
+    #         cart_item.updated_at = now()
+    #   except IntegrityError as e:
+    #       print('product_item or cart doesn\'t exist')
+    #       return
+    #   Cart.objects.filter(id=cart_id).update(created_at=now())
 
 
 class Order(models.Model):
