@@ -7,6 +7,10 @@ from django.db import models
 from django.db.models.query import QuerySet
 from django.utils.translation import gettext_lazy as _
 
+from .exceptions import EmptyQuerySet, NotEnoughProductLeft, TooBigToAdd
+
+MAX_AMOUNT_ADDED = 10000
+
 
 class SelectRelatedManager(models.Manager):
     def __init__(self, select_related_model_name: str) -> None:
@@ -343,8 +347,13 @@ class ProductAttribute(models.Model):
 class ProductAttributeValue(models.Model):
     """Value of a product attribute."""
 
-    objects = SelectRelatedManager("attr")
+    class MyMan(models.Manager):
+        def get_queryset(self) -> QuerySet:
+            """Join related object's data to main queryset."""
+            queryset = super().get_queryset()
+            return queryset.select_related("attr")
 
+    # objects = SelectRelatedManager(select_related_model_name="attr")
     attr = models.ForeignKey(
         ProductAttribute, related_name="values", on_delete=models.PROTECT
     )
@@ -354,6 +363,7 @@ class ProductAttributeValue(models.Model):
         unique=True,
         help_text=_("required, max_length: 255"),
     )
+    objects = MyMan()  # related_descriptor conflict
 
     def __str__(self):
         return f"{self.attr}: {self.value}"
@@ -412,6 +422,8 @@ class ProductItem(models.Model):
     )
 
     def __str__(self):
+        # this queries the product_set. Need to change to select_related or
+        # to remove link to product_set
         return f"{self.product_set.name}: {self.sku}"
 
     @property
@@ -426,12 +438,17 @@ class ProductItem(models.Model):
 class ProductToAttributeLinkTable(models.Model):
     """Link table for product items and attribute values."""
 
+    # Maybe it's more convinient to include attrs and their values to
+    # ProductItems JSONField. Need to think about it.
+
     product_item = models.ForeignKey(ProductItem, on_delete=models.PROTECT)
     attr_values = models.ForeignKey(
         ProductAttributeValue,
         related_name="prod_items",
         on_delete=models.PROTECT,
     )
+
+    # objects = SelectRelatedManager("product_item")
 
     class Meta:
         constraints = [
@@ -493,12 +510,31 @@ class Stock(models.Model):
         default=0,
         help_text=_("required, default: 0"),
     )
+    created_at = models.DateTimeField(
+        _("Stock item creation time"),
+        auto_now_add=True,
+        help_text=_("format: Y-m-d H:M:S"),
+    )
+    updated_at = models.DateTimeField(
+        _("Stock item last update time"),
+        auto_now=True,
+        help_text=_("format: Y-m-d H:M:S"),
+    )
 
-    def add(self, value: int):
+    def add(self, value: int) -> None:
+        if value >= MAX_AMOUNT_ADDED:
+            raise TooBigToAdd(value)
         self.current_amount += value
+        self.save()
 
-    def subtract(self, value: int):
+    def subtract(self, value: int) -> None:
+        if value > self.current_amount:
+            raise NotEnoughProductLeft(self)
         self.current_amount -= value
+        self.save()
+
+    def __str__(self) -> str:
+        return self.product_id
 
 
 class Cart(models.Model):
@@ -536,7 +572,7 @@ class Cart(models.Model):
         self.items.all().delete()
 
     def __str__(self) -> str:
-        return self.customer_id
+        return str(self.customer_id)
 
 
 class CartItem(models.Model):
@@ -554,6 +590,11 @@ class CartItem(models.Model):
         validators=[MinValueValidator(1)],
         help_text=_("reqiured, positive integer"),
         default=1,
+    )
+    marked_for_order = models.BooleanField(
+        _("Item selected to be ordered"),
+        default=False,
+        help_text=_("required, default: False"),
     )
     created_at = models.DateTimeField(
         _("cart_item creation time"),
@@ -573,6 +614,7 @@ class CartItem(models.Model):
     # view behavior:
     # def add_cart_item(request, prod_id, cart_id, quantity=1):
     #   from django.utils.timezone import now
+
     #   try:
     #       cart_item, created = CartItem.objects.get_or_create(cart_id=cart_id, product_id=product_id)
     #       if created:
@@ -582,12 +624,19 @@ class CartItem(models.Model):
     #       print('product_item or cart doesn\'t exist')
     #       return
     #   Cart.objects.filter(id=cart_id).update(created_at=now())
+    #
+    # or maybe need to fetch the product: ProductItem.objects.select_related('cart').get(id=prod_id)
 
 
 class Order(models.Model):
-    user = models.ForeignKey(
+    customer = models.ForeignKey(
         Customer, related_name="orders", on_delete=models.PROTECT
     )  # change to models.SET_DEFAULT
+    items = models.ManyToManyField(
+        CartItem,
+        related_name="orders",
+        help_text=_("Items from Cart included in Order"),
+    )
     products = models.ManyToManyField(ProductItem, related_name="orders")
     created_at = models.DateTimeField(
         _("order creation time"),
@@ -617,6 +666,19 @@ class Order(models.Model):
     )
     # delivery_info = ...  # FK DELIVERY
 
+    def from_cart(self, cart_id: int):
+        if cart_items := CartItem.objects.filter(cart_id=cart_id).filter(
+            marked_for_order=True
+        ):
+            self.items.add(cart_items)
+        else:
+            raise EmptyQuerySet(f'No items ready for order in Cart # {cart_id}')
+
 
 class Comment(models.Model):
     pass
+
+
+class Foo(models.Model):
+    label = models.CharField(_("label"), max_length=100)
+    attrs = models.JSONField(_("attrs"))
