@@ -39,16 +39,36 @@ class BaseUser(AbstractUser):
 
 
 class User(BaseUser):
-    pass
+    is_active = models.BooleanField(
+        _("active"),
+        default=False,
+        help_text=_(
+            "Designates whether this user should be treated as active. "
+            "Unselect this instead of deleting accounts."
+        ),
+    )
 
 
 class Customer(models.Model):
+    class CustomerStatus(models.TextChoices):
+        CREATED = "created"
+        ACTIVE = "active"
+        FROZEN = "frozen"
+        ARCHIVED = "archived"
+
     objects = CustomerManager("user")
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         related_name="customer",
         on_delete=models.CASCADE,
+    )
+    status = models.CharField(
+        _("Customer status"),
+        max_length=20,
+        choices=CustomerStatus.choices,
+        default=CustomerStatus.CREATED,
+        help_text=_("required, default: created"),
     )
     phone_number = models.CharField(
         _("Customer phone number"),
@@ -95,6 +115,10 @@ class Customer(models.Model):
     @property
     def date_joined(self) -> dt.datetime:
         return self.user.date_joined
+
+    @property
+    def is_active(self) -> bool:
+        return self.user.is_active
 
     @property
     def is_anonymous(self) -> bool:
