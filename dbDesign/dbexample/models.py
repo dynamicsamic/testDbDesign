@@ -629,6 +629,17 @@ class CartItem(models.Model):
 
 
 class Order(models.Model):
+    class OrderStatus(models.TextChoices):
+        CREATED = "created"
+        PAID = "paid"
+        PROCESSING = "processing"
+        DELIVERY_READY = "delivery_ready"
+        ON_DELIVERY = "on_delivery"
+        DELIVERED = "delivered"
+        FINISHED = "finished"
+        CANCELED_BY_CUSTOMER = "canceled_by_customer"
+        CANCELED_BY_SELLER = "canceled_by_seller"
+
     customer = models.ForeignKey(
         Customer, related_name="orders", on_delete=models.PROTECT
     )  # change to models.SET_DEFAULT
@@ -637,7 +648,14 @@ class Order(models.Model):
         related_name="orders",
         help_text=_("Items from Cart included in Order"),
     )
-    products = models.ManyToManyField(ProductItem, related_name="orders")
+    _status = models.CharField(
+        _("Order status"),
+        max_length=50,
+        choices=OrderStatus.choices,
+        default=OrderStatus.CREATED,
+        help_text=_("required, default: created"),
+    )
+    # products = models.ManyToManyField(ProductItem, related_name="orders")
     created_at = models.DateTimeField(
         _("order creation time"),
         auto_now_add=True,
@@ -670,9 +688,22 @@ class Order(models.Model):
         if cart_items := CartItem.objects.filter(cart_id=cart_id).filter(
             marked_for_order=True
         ):
-            self.items.add(cart_items)
+            self.items.add(*cart_items)
         else:
-            raise EmptyQuerySet(f'No items ready for order in Cart # {cart_id}')
+            raise EmptyQuerySet(
+                f"No items ready for order in Cart # {cart_id}"
+            )
+
+    @property
+    def status(self) -> str:
+        return self._status
+
+    @status.setter
+    def status(self, value: str) -> None:
+        if stat := getattr(self.OrderStatus, value, None):
+            self._status = stat
+        else:
+            raise ValueError(f"{value} is not a valid choice fo OrderStatus")
 
 
 class Comment(models.Model):
