@@ -52,7 +52,7 @@ class User(BaseUser):
 class Customer(models.Model):
     class CustomerStatus(models.TextChoices):
         CREATED = "created"
-        ACTIVE = "active"
+        ACTIVATED = "activated"
         FROZEN = "frozen"
         ARCHIVED = "archived"
 
@@ -396,6 +396,8 @@ class ProductAttributeValue(models.Model):
 class ProductItem(models.Model):
     """Particular item of product with specific attributes."""
 
+    # think about productname = charfield, null=true, to save after initialization
+    # to reduce db hits
     sku = models.CharField(
         _("stock keeping unit"),
         max_length=20,
@@ -607,7 +609,10 @@ class CartItem(models.Model):
         verbose_name="Item in cart",
     )
     product = models.ForeignKey(
-        ProductItem, on_delete=models.PROTECT, verbose_name=_("Product item")
+        ProductItem,
+        related_name="in_cart",
+        on_delete=models.PROTECT,
+        verbose_name=_("Product item"),
     )
     _quantity = models.PositiveIntegerField(
         _("Product quantity"),
@@ -667,11 +672,6 @@ class Order(models.Model):
     customer = models.ForeignKey(
         Customer, related_name="orders", on_delete=models.PROTECT
     )  # change to models.SET_DEFAULT
-    items = models.ManyToManyField(
-        CartItem,
-        related_name="orders",
-        help_text=_("Items from Cart included in Order"),
-    )
     _status = models.CharField(
         _("Order status"),
         max_length=50,
@@ -679,7 +679,6 @@ class Order(models.Model):
         default=OrderStatus.CREATED,
         help_text=_("required, default: created"),
     )
-    # products = models.ManyToManyField(ProductItem, related_name="orders")
     created_at = models.DateTimeField(
         _("order creation time"),
         auto_now_add=True,
@@ -708,15 +707,15 @@ class Order(models.Model):
     )
     # delivery_info = ...  # FK DELIVERY
 
-    def from_cart(self, cart_id: int):
-        if cart_items := CartItem.objects.filter(cart_id=cart_id).filter(
-            marked_for_order=True
-        ):
-            self.items.add(*cart_items)
-        else:
-            raise EmptyQuerySet(
-                f"No items ready for order in Cart # {cart_id}"
-            )
+    # def from_cart(self, cart_id: int):
+    #    if cart_items := CartItem.objects.filter(cart_id=cart_id).filter(
+    #        marked_for_order=True
+    #    ):
+    #        self.items.add(*cart_items)
+    #    else:
+    #        raise EmptyQuerySet(
+    #            f"No items ready for order in Cart # {cart_id}"
+    #        )
 
     @property
     def status(self) -> str:
@@ -728,6 +727,67 @@ class Order(models.Model):
             self._status = stat
         else:
             raise ValueError(f"{value} is not a valid choice fo OrderStatus")
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(
+        Order,
+        related_name="items",
+        on_delete=models.CASCADE,
+        verbose_name=_("Customer Order"),
+    )
+    product = models.ForeignKey(
+        ProductItem,
+        related_name="in order",
+        on_delete=models.PROTECT,
+        verbose_name="Ordered product",
+        blank=True,
+        null=True,
+    )
+    product_name = models.CharField(
+        _("Product name"),
+        max_length=150,
+        help_text=_("required, max_len: 150"),
+        blank=True,
+        null=True,
+    )
+    sku = models.CharField(
+        _("stock keeping unit"),
+        max_length=20,
+        help_text="optional, max_len: 20",
+        blank=True,
+        null=True,
+    )
+    quantity = models.PositiveIntegerField(
+        _("Quantity of the ordered product"),
+        default=1,
+        help_text=_("optional: default 1"),
+        blank=True,
+        null=True,
+    )
+    price = models.DecimalField(
+        _("Final price of ordered product"),
+        max_digits=9,
+        decimal_places=2,
+        help_text=_("optional, max_price: 9 999 999.99"),
+        blank=True,
+        null=True,
+    )
+    sum = models.DecimalField(
+        _("Final sum of ordered product"),
+        max_digits=12,
+        decimal_places=2,
+        help_text=_("optional, max_sum: 9 999 999 999.99"),
+        blank=True,
+        null=True,
+    )
+
+    @classmethod
+    def from_cart_item(cls, cart_item):
+        cust_id = cart_item.cart.customer_id
+        data = cart_item.to_order_item()
+        order = Order.objects.get(customer_id=cust_id)
+        return cls.objects.create(order, **data)
 
 
 class Comment(models.Model):
