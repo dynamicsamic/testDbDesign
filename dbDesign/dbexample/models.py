@@ -393,11 +393,38 @@ class ProductAttributeValue(models.Model):
         return f"{self.attr}: {self.value}"
 
 
+class ProductItemManager(models.Manager):
+    def create(self, **kwargs):
+        # product_name
+        # kwargs.update({'product_name'})
+        p_set = kwargs.get("product_set")
+        attrs = kwargs.get("attrs")
+        if p_set and attrs:
+            p_name = (
+                p_set.name + " " + " ".join([attr.value for attr in attrs])
+            )
+            kwargs.update({"product_name": p_name})
+        return super().create(**kwargs)
+        # obj = super().create(**kwargs)
+        # p_name = obj.product_set.name
+        # full_name = p_name + " " + " ".join([attr.value for attr in obj.attrs])
+        # obj.product_name = full_name
+        # obj.save()
+        # return obj
+
+
 class ProductItem(models.Model):
     """Particular item of product with specific attributes."""
 
     # think about productname = charfield, null=true, to save after initialization
     # to reduce db hits
+    product_name = models.CharField(
+        _("Product name"),
+        max_length=150,
+        help_text=_("optional, max_len: 150"),
+        blank=True,
+        null=True,
+    )
     sku = models.CharField(
         _("stock keeping unit"),
         max_length=20,
@@ -447,10 +474,10 @@ class ProductItem(models.Model):
         help_text=_("format: Y-m-d H:M:S"),
     )
 
+    objects = ProductItemManager()
+
     def __str__(self):
-        # this queries the product_set. Need to change to select_related or
-        # to remove link to product_set
-        return f"{self.product_set.name}: {self.sku}"
+        return self.product_name
 
     @property
     def views(self):
@@ -473,8 +500,6 @@ class ProductToAttributeLinkTable(models.Model):
         related_name="prod_items",
         on_delete=models.PROTECT,
     )
-
-    # objects = SelectRelatedManager("product_item")
 
     class Meta:
         constraints = [
@@ -601,6 +626,13 @@ class Cart(models.Model):
         return str(self.customer_id)
 
 
+class CartItemManager(models.Manager):
+    def create(self, **kwargs):
+        if product := kwargs.get("product"):
+            kwargs.update({"product_name": product.product_name})
+        return super().create(**kwargs)
+
+
 class CartItem(models.Model):
     cart = models.ForeignKey(
         Cart,
@@ -613,6 +645,13 @@ class CartItem(models.Model):
         related_name="in_cart",
         on_delete=models.PROTECT,
         verbose_name=_("Product item"),
+    )
+    product_name = models.CharField(
+        _("Product name"),
+        max_length=150,
+        help_text=_("optional, max_len: 150"),
+        blank=True,
+        null=True,
     )
     _quantity = models.PositiveIntegerField(
         _("Product quantity"),
@@ -635,6 +674,16 @@ class CartItem(models.Model):
         auto_now=True,
         help_text=_("format: Y-m-d H:M:S"),
     )
+
+    objects = CartItemManager()
+
+    def to_order_item(self) -> dict:
+        return {
+            "product": self.product,
+            "product_name": self.product_name,
+            "quantity": self._quantity,
+            "sku": self.product.sku,
+        }
 
     def add_quantity(self, quantity: int) -> None:
         self._quantity += quantity
@@ -795,5 +844,20 @@ class Comment(models.Model):
 
 
 class Foo(models.Model):
+    class MAN(models.Manager):
+        def create(self, **kwargs):
+            kwargs.update({"label": "FFFF"})
+            obj = super().create(**kwargs)
+            # obj.label = "FFFFFF"
+            # obj.save()
+            return obj
+
+    objects = MAN()
+
     label = models.CharField(_("label"), max_length=100)
     attrs = models.JSONField(_("attrs"))
+
+    # def save(self, *args, **kwargs) -> None:
+    #    result = super().save(*args, **kwargs)
+    #    self.label = "GGGGGGG"
+    #    return result
