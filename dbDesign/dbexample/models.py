@@ -2,7 +2,7 @@ import datetime as dt
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Sum
 from django.db.models.query import QuerySet
@@ -394,6 +394,12 @@ class ProductAttributeValue(models.Model):
         return f"{self.attr}: {self.value}"
 
 
+def _get_full_price(regular_price, discount) -> str:
+    """Return str to preserve 2 float digits in all cases."""
+    price = regular_price * ((100 - discount) / 100)
+    return format(price, ".2f")
+
+
 class ProductItemManager(models.Manager):
     def create(self, **kwargs):
         # product_name
@@ -408,7 +414,14 @@ class ProductItemManager(models.Manager):
             else:
                 p_name = p_set.name
             kwargs.update({"product_name": p_name})
-        return super().create(**kwargs)
+        reg_price = kwargs.get("regular_price")
+        discount = kwargs.get("discount")
+        if reg_price and discount:
+            kwargs.update(
+                {"final_price": _get_full_price(reg_price, discount)}
+            )
+        super().create(**kwargs)
+
         # obj = super().create(**kwargs)
         # p_name = obj.product_set.name
         # full_name = p_name + " " + " ".join([attr.value for attr in obj.attrs])
@@ -444,16 +457,24 @@ class ProductItem(models.Model):
     #    ImageSet, related_name="product_items", on_delete=models.SET_DEFAULT
     # )
     regular_price = models.DecimalField(
-        _("product item regular price"),
+        _("Product item price"),
         max_digits=9,
         decimal_places=2,
         help_text=_("required, max_price: 9_999_999.99"),
     )
-    discount_price = models.DecimalField(
-        _("product item discount price"),
+    discount = models.PositiveSmallIntegerField(
+        _("Discount rate (integer)"),
+        default=0,
+        help_text=_("required, default: 0"),
+        validators=[MaxValueValidator(99)],
+    )
+    final_price = models.DecimalField(
+        _("Product item final price"),
         max_digits=9,
-        decimal_places=2,
-        help_text=_("required, max_price: 9_999_999.99"),
+        decimal_paces=2,
+        blank=True,
+        null=True,
+        help_text=_("set automatically"),
     )
     # discount = models.ManyToManyField(Discount)
     is_active = models.BooleanField(
