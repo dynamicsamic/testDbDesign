@@ -4,6 +4,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models import Sum
 from django.db.models.query import QuerySet
 from django.utils.translation import gettext_lazy as _
 
@@ -399,10 +400,13 @@ class ProductItemManager(models.Manager):
         # kwargs.update({'product_name'})
         p_set = kwargs.get("product_set")
         attrs = kwargs.get("attrs")
-        if p_set and attrs:
-            p_name = (
-                p_set.name + " " + " ".join([attr.value for attr in attrs])
-            )
+        if p_set:
+            if attrs:
+                p_name = (
+                    p_set.name + " " + " ".join([attr.value for attr in attrs])
+                )
+            else:
+                p_name = p_set.name
             kwargs.update({"product_name": p_name})
         return super().create(**kwargs)
         # obj = super().create(**kwargs)
@@ -416,8 +420,6 @@ class ProductItemManager(models.Manager):
 class ProductItem(models.Model):
     """Particular item of product with specific attributes."""
 
-    # think about productname = charfield, null=true, to save after initialization
-    # to reduce db hits
     product_name = models.CharField(
         _("Product name"),
         max_length=150,
@@ -776,6 +778,9 @@ class Order(models.Model):
             self._status = stat
         else:
             raise ValueError(f"{value} is not a valid choice fo OrderStatus")
+
+    def get_total_sum(self) -> float:
+        OrderItem.objects.filter(order_id=self.id).aggregate(Sum("sum"))
 
 
 class OrderItem(models.Model):
