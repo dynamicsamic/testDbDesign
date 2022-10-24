@@ -1,4 +1,5 @@
 import datetime as dt
+from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -394,12 +395,6 @@ class ProductAttributeValue(models.Model):
         return f"{self.attr}: {self.value}"
 
 
-def _get_full_price(regular_price, discount) -> str:
-    """Return str to preserve 2 float digits in all cases."""
-    price = regular_price * ((100 - discount) / 100)
-    return format(price, ".2f")
-
-
 class ProductItemManager(models.Manager):
     def create(self, **kwargs):
         # product_name
@@ -414,12 +409,6 @@ class ProductItemManager(models.Manager):
             else:
                 p_name = p_set.name
             kwargs.update({"product_name": p_name})
-        reg_price = kwargs.get("regular_price")
-        discount = kwargs.get("discount")
-        if reg_price and discount:
-            kwargs.update(
-                {"final_price": _get_full_price(reg_price, discount)}
-            )
         super().create(**kwargs)
 
         # obj = super().create(**kwargs)
@@ -432,6 +421,8 @@ class ProductItemManager(models.Manager):
 
 class ProductItem(models.Model):
     """Particular item of product with specific attributes."""
+
+    # think about favorites
 
     product_name = models.CharField(
         _("Product name"),
@@ -456,7 +447,7 @@ class ProductItem(models.Model):
     # images = models.ForeignKey(
     #    ImageSet, related_name="product_items", on_delete=models.SET_DEFAULT
     # )
-    regular_price = models.DecimalField(
+    _price = models.DecimalField(
         _("Product item price"),
         max_digits=9,
         decimal_places=2,
@@ -468,14 +459,14 @@ class ProductItem(models.Model):
         help_text=_("required, default: 0"),
         validators=[MaxValueValidator(99)],
     )
-    final_price = models.DecimalField(
-        _("Product item final price"),
-        max_digits=9,
-        decimal_paces=2,
-        blank=True,
-        null=True,
-        help_text=_("set automatically"),
-    )
+    # final_price = models.DecimalField(
+    #    _("Product item final price"),
+    #    max_digits=9,
+    #    decimal_paces=2,
+    #    blank=True,
+    #    null=True,
+    #    help_text=_("set automatically"),
+    # )
     # discount = models.ManyToManyField(Discount)
     is_active = models.BooleanField(
         _("product item status"),
@@ -503,10 +494,27 @@ class ProductItem(models.Model):
         return self.product_name
 
     @property
-    def views(self):
+    def views(self) -> int:
         return self._view_count
 
-    def increment_view_count(self):
+    @property
+    def price(self) -> Decimal:
+        return self._price
+
+    @price.setter
+    def price(self, value) -> None:
+        try:
+            self._price = Decimal(format(value, ".2f"))
+            self.save()
+        except ValueError:
+            pass
+
+    @property
+    def discounted_price(self) -> float:
+        price = float(self._price) * ((100 - self.discount) / 100)
+        return round(price, 2)
+
+    def increment_view_count(self) -> None:
         self._view_count += 1
         self.save()
 
