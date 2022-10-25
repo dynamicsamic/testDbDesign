@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Sum
@@ -518,6 +519,15 @@ class ProductItem(models.Model):
         self._view_count += 1
         self.save()
 
+    def to_dict(self) -> dict:
+        return {
+            "product_name": self.product_name,
+            "sku": self.sku,
+            "regular_price": self._price,
+            "discount": self.discount,
+            "final_price": self.discounted_price,
+        }
+
 
 class ProductToAttributeLinkTable(models.Model):
     """Link table for product items and attribute values."""
@@ -615,8 +625,11 @@ class Stock(models.Model):
         self.current_amount -= value
         self.save()
 
+    def available(self, amount: int) -> bool:
+        return self.current_amount >= amount
+
     def __str__(self) -> str:
-        return self.product_id
+        return str(self.product_id)
 
 
 class Cart(models.Model):
@@ -659,9 +672,23 @@ class Cart(models.Model):
 
 class CartItemManager(models.Manager):
     def create(self, **kwargs):
-        if product := kwargs.get("product"):
-            kwargs.update({"product_name": product.product_name})
+        wargs = kwargs.copy()
+        wargs.pop("_quantity", None)
+
+        obj, exists = super().get_or_create(**kwargs)
+        if exists:
+            pass
+        # try:
+        #    cart_item = self.model.objects.get
         return super().create(**kwargs)
+
+    #   if product := kwargs.get("product"):
+    #       kwargs.update(
+    #           {
+    #               "product_name": product.product_name,
+    #               "price": product.discounted_price,
+    #           }
+    #       )
 
 
 class CartItem(models.Model):
@@ -684,11 +711,42 @@ class CartItem(models.Model):
         blank=True,
         null=True,
     )
+    sku = models.CharField(
+        _("stock keeping unit"),
+        max_length=20,
+        help_text="optional, max_len: 20",
+        blank=True,
+        null=True,
+    )
     _quantity = models.PositiveIntegerField(
         _("Product quantity"),
         validators=[MinValueValidator(1)],
         help_text=_("reqiured, positive integer"),
         default=1,
+    )
+    regular_price = models.DecimalField(
+        _("Product item price"),
+        max_digits=9,
+        decimal_places=2,
+        help_text=_("optional, max_price: 9_999_999.99"),
+        blank=True,
+        null=True,
+    )
+    discount = models.PositiveSmallIntegerField(
+        _("Discount rate (integer)"),
+        default=0,
+        help_text=_("optional, default: 0"),
+        validators=[MaxValueValidator(99)],
+        blank=True,
+        null=True,
+    )
+    final_price = models.DecimalField(
+        _("Discounted cart item price"),
+        max_digits=9,
+        decimal_places=2,
+        help_text=_("optional, max_price: 9_999_999.99"),
+        blank=True,
+        null=True,
     )
     marked_for_order = models.BooleanField(
         _("Item selected to be ordered"),
@@ -706,7 +764,28 @@ class CartItem(models.Model):
         help_text=_("format: Y-m-d H:M:S"),
     )
 
-    objects = CartItemManager()
+    # objects = CartItemManager()
+
+    @classmethod
+    def from_product_item(
+        cls, cart: Cart, product_item_id: int, **kwargs: dict
+    ):
+        product_item = ProductItem.objects.select_related("stock").get(
+            id=product_item_id
+        )
+        if not product_item.is_active():
+            raise ValidationError(
+                _("Inactive products can't be added to cart")
+            )
+        if not product_item.stock.available(kwargs.get("_quantity", 1)):
+            raise ValidationError(_("Not enough product in stock"))
+        data = product_item.to_dict()
+        kwargs.update(data)
+        cart_item = cls.objects.create(
+            cart=cart, product=product_item, **kwargs
+        )
+
+        return cart_item
 
     def to_order_item(self) -> dict:
         return {
@@ -714,6 +793,7 @@ class CartItem(models.Model):
             "product_name": self.product_name,
             "quantity": self._quantity,
             "sku": self.product.sku,
+            "price": self.price,
         }
 
     def add_quantity(self, quantity: int) -> None:
@@ -739,7 +819,7 @@ class CartItem(models.Model):
 
 class Order(models.Model):
     class OrderStatus(models.TextChoices):
-        CREATED = "created"
+        PENDING = "pending"
         PAID = "paid"
         PROCESSING = "processing"
         DELIVERY_READY = "delivery_ready"
@@ -775,6 +855,8 @@ class Order(models.Model):
     total_sum = models.PositiveIntegerField(
         _("order sum without discounts"),
         help_text=_("required, positive number"),
+        blank=True,
+        null=True,
     )
     total_discount = models.PositiveIntegerField(
         _("sum of discounts"),
@@ -783,7 +865,10 @@ class Order(models.Model):
         help_text=_("optional, positive number"),
     )
     final_sum = models.PositiveIntegerField(
-        _("order sum with discounts"), help_text=_("required, positive number")
+        _("order sum with discounts"),
+        help_text=_("required, positive number"),
+        blank=True,
+        null=True,
     )
     # delivery_info = ...  # FK DELIVERY
 
@@ -810,6 +895,18 @@ class Order(models.Model):
 
     def get_total_sum(self) -> float:
         OrderItem.objects.filter(order_id=self.id).aggregate(Sum("sum"))
+
+    @classmethod
+    def create_from_cart(cls, customer):
+        order, _ = cls.objects.get_or_create(
+            customer, _status=cls.OrderStatus.PENDING
+        )
+        cart = Cart.objects.filter(
+            customer_id=customer.id, status=Cart.CartStatus.IN_PROGRESS
+        ).first()
+        cart_items = cart.items.all()
+        for item in cart_items:
+            OrderItem.from_cart_item(order, item)
 
 
 class OrderItem(models.Model):
@@ -866,10 +963,9 @@ class OrderItem(models.Model):
     )
 
     @classmethod
-    def from_cart_item(cls, cart_item):
-        cust_id = cart_item.cart.customer_id
+    def from_cart_item(cls, order: Order, cart_item: CartItem):
         data = cart_item.to_order_item()
-        order = Order.objects.get(customer_id=cust_id)
+        cart_item.delete()
         return cls.objects.create(order, **data)
 
 
