@@ -620,7 +620,7 @@ class Stock(models.Model):
         self.current_amount += value
         self.save()
 
-    def subtract(self, value: int) -> None:
+    def deduct(self, value: int) -> None:
         if value > self.current_amount:
             raise NotEnoughProductLeft(self)
         self.current_amount -= value
