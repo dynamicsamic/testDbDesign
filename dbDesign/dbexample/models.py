@@ -1,5 +1,6 @@
 import datetime as dt
 from decimal import Decimal
+from typing import Any, Mapping
 
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
@@ -671,16 +672,23 @@ class Cart(models.Model):
 
 
 class CartItemManager(models.Manager):
-    def create(self, **kwargs):
-        wargs = kwargs.copy()
-        wargs.pop("_quantity", None)
-
-        obj, exists = super().get_or_create(**kwargs)
-        if exists:
-            pass
-        # try:
-        #    cart_item = self.model.objects.get
-        return super().create(**kwargs)
+    def create(self, **kwargs: Mapping[str, Any]):
+        """Check if a product is already in the cart.
+        If it is increase the quantity.
+        If it's not - create a new cart item.
+        """
+        cart = kwargs.get("cart")
+        product = kwargs.get("product")
+        quantity = kwargs.get("_quantity", 1)
+        try:
+            cart_item = self.model.objects.get(cart=cart, product=product)
+            cart_item.add_quantity(quantity)
+        except self.model.DoesNotExist:
+            cart_item = super().create(**kwargs)
+        except Exception as e:
+            print(f"An unexpected error occured: {e}")
+            return
+        return cart_item
 
     #   if product := kwargs.get("product"):
     #       kwargs.update(
@@ -764,12 +772,22 @@ class CartItem(models.Model):
         help_text=_("format: Y-m-d H:M:S"),
     )
 
-    # objects = CartItemManager()
+    objects = CartItemManager()
+
+    def save(self, *args, **kwargs) -> None:
+        """Update cart info each time a cart item updated."""
+        super().save(*args, **kwargs)
+        self.cart.save(update_fields=("updated_at",))
 
     @classmethod
     def from_product_item(
         cls, cart: Cart, product_item_id: int, **kwargs: dict
     ):
+        """Create CartItem from ProductItem.
+        Prevent creating cart items from inactive products
+        and products that don't have enough stock items.
+        Fetch stock data along with product item to prevent additional sql queries.
+        """
         product_item = ProductItem.objects.select_related("stock").get(
             id=product_item_id
         )
@@ -779,21 +797,33 @@ class CartItem(models.Model):
             )
         if not product_item.stock.available(kwargs.get("_quantity", 1)):
             raise ValidationError(_("Not enough product in stock"))
-        data = product_item.to_dict()
-        kwargs.update(data)
+            # maybe need to deduct from stock to reserve items for order
+            # but then need to keep notice of cleansing the cart periodically
+        product_data = product_item.to_dict()
+        kwargs.update(product_data)
         cart_item = cls.objects.create(
             cart=cart, product=product_item, **kwargs
         )
 
         return cart_item
 
-    def to_order_item(self) -> dict:
+    def to_dict(self) -> dict:
+        # d = self.__dict__.copy()
+        # d.pop('_state', None)
+        # d.pop('created_at', None)
+        # d.pop('updated_at', None)
+        # d.update({'cart': self.cart})
+        # return d
         return {
+            "cart": self.cart,
             "product": self.product,
             "product_name": self.product_name,
+            "sku": self.sku,
             "quantity": self._quantity,
-            "sku": self.product.sku,
-            "price": self.price,
+            "regular_price": self.regular_price,
+            "discount": self.discount,
+            "fianl_price": self.final_price,
+            "marked_for_order": self.marked_for_order,
         }
 
     def add_quantity(self, quantity: int) -> None:
@@ -963,10 +993,12 @@ class OrderItem(models.Model):
     )
 
     @classmethod
-    def from_cart_item(cls, order: Order, cart_item: CartItem):
-        data = cart_item.to_order_item()
+    def from_cart_item(cls, order: Order, cart_item: CartItem, **kwargs):
+        data = cart_item.to_dict()
+        kwargs.update(data)
         cart_item.delete()
-        return cls.objects.create(order, **data)
+        # `sum` field is not handled yet
+        return cls.objects.create(order, **kwargs)
 
 
 class Comment(models.Model):
