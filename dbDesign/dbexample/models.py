@@ -507,7 +507,7 @@ class ProductItem(models.Model):
     def price(self, value) -> None:
         try:
             self._price = Decimal(format(value, ".2f"))
-            self.save()
+            self.save(update_fields=("_price",))
         except ValueError:
             pass
 
@@ -518,7 +518,7 @@ class ProductItem(models.Model):
 
     def increment_view_count(self) -> None:
         self._view_count += 1
-        self.save()
+        self.save(update_fields=("_view_count",))
 
     def to_dict(self) -> dict:
         return {
@@ -618,13 +618,13 @@ class Stock(models.Model):
         if value >= MAX_AMOUNT_ADDED:
             raise TooBigToAdd(value)
         self.current_amount += value
-        self.save()
+        self.save(update_fields=("current_amount",))
 
     def deduct(self, value: int) -> None:
         if value > self.current_amount:
             raise NotEnoughProductLeft(self)
         self.current_amount -= value
-        self.save()
+        self.save(update_fields=("current_amount",))
 
     def available(self, amount: int) -> bool:
         return self.current_amount >= amount
@@ -667,14 +667,29 @@ class Cart(models.Model):
     def clear_out(self):
         self.items.all().delete()
 
+    def get_initial_sum(self) -> float:
+        val = CartItem.objects.filter(cart_id=self.id).aggregate(
+            Sum("regular_price")
+        )
+        return round(val, 2)
+
+    def get_total_sum(self) -> float:
+        val = CartItem.objects.filter(cart_id=self.id).aggregate(
+            Sum("final_price")
+        )
+        return round(val, 2)
+
+    def get_total_discount(self) -> float:
+        return round(self.get_initial_sum() - self.get_total_sum(), 2)
+
     def __str__(self) -> str:
         return str(self.customer_id)
 
 
 class CartItemManager(models.Manager):
     def create(self, **kwargs: Mapping[str, Any]):
-        """Check if a product is already in the cart.
-        If it is increase the quantity.
+        """Check if a product item is already in the cart.
+        If it's there - increase the quantity.
         If it's not - create a new cart item.
         """
         cart = kwargs.get("cart")
@@ -688,6 +703,9 @@ class CartItemManager(models.Manager):
         except Exception as e:
             print(f"An unexpected error occured: {e}")
             return
+        if cart.status == Cart.CartStatus.EMPTY:
+            cart.status = Cart.CartStatus.IN_PROGRESS
+            cart.save(update_fields=("status",))
         return cart_item
 
     #   if product := kwargs.get("product"):
@@ -756,6 +774,7 @@ class CartItem(models.Model):
         blank=True,
         null=True,
     )
+    # is_active ??
     marked_for_order = models.BooleanField(
         _("Item selected to be ordered"),
         default=False,
@@ -828,7 +847,7 @@ class CartItem(models.Model):
 
     def add_quantity(self, quantity: int) -> None:
         self._quantity += quantity
-        self.save()
+        self.save(update_fields=("_quantity",))
 
     # view behavior:
     # def add_cart_item(request, prod_id, cart_id, quantity=1):
@@ -924,7 +943,9 @@ class Order(models.Model):
             raise ValueError(f"{value} is not a valid choice fo OrderStatus")
 
     def get_total_sum(self) -> float:
-        OrderItem.objects.filter(order_id=self.id).aggregate(Sum("sum"))
+        return round(
+            OrderItem.objects.filter(order_id=self.id).aggregate(Sum("sum")), 2
+        )
 
     @classmethod
     def create_from_cart(cls, customer):
