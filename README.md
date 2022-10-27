@@ -1,0 +1,1 @@
+#### Database design concept for an online store (a rough example, unpolished, always changing) 
