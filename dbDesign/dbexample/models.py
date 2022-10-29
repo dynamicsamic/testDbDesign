@@ -1039,8 +1039,3 @@ class Foo(models.Model):
 
     label = models.CharField(_("label"), max_length=100)
     attrs = models.JSONField(_("attrs"))
-
-    # def save(self, *args, **kwargs) -> None:
-    #    result = super().save(*args, **kwargs)
-    #    self.label = "GGGGGGG"
-    #    return result
