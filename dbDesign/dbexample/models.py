@@ -12,6 +12,7 @@ from django.db.models.query import QuerySet
 from django.utils.translation import gettext_lazy as _
 
 from .exceptions import EmptyQuerySet, NotEnoughProductLeft, TooBigToAdd
+from .utils import decimalize
 
 MAX_AMOUNT_ADDED = 10000
 
@@ -694,7 +695,7 @@ class CartItemManager(models.Manager):
         """
         cart = kwargs.get("cart")
         product = kwargs.get("product")
-        quantity = kwargs.get("_quantity", 1)
+        quantity = kwargs.get("quantity", 1)
         try:
             cart_item = self.model.objects.get(cart=cart, product=product)
             cart_item.add_quantity(quantity)
@@ -744,7 +745,7 @@ class CartItem(models.Model):
         blank=True,
         null=True,
     )
-    _quantity = models.PositiveIntegerField(
+    quantity = models.PositiveIntegerField(
         _("Product quantity"),
         validators=[MinValueValidator(1)],
         help_text=_("reqiured, positive integer"),
@@ -800,21 +801,26 @@ class CartItem(models.Model):
 
     @classmethod
     def from_product_item(
-        cls, cart: Cart, product_item_id: int, **kwargs: dict
+        cls, customer_id: int, product_item_id: int, **kwargs: dict
     ):
         """Create CartItem from ProductItem.
         Prevent creating cart items from inactive products
         and products that don't have enough stock items.
         Fetch stock data along with product item to prevent additional sql queries.
         """
-        product_item = ProductItem.objects.select_related("stock").get(
-            id=product_item_id
-        )
+        try:
+            cart = Cart.objects.get(customer_id=customer_id)
+            product_item = ProductItem.objects.select_related("stock").get(
+                id=product_item_id
+            )
+        except (Cart.DoesNotExist, ProductItem.DoesNotExist) as e:
+            print(e)
+            raise
         if not product_item.is_active():
             raise ValidationError(
                 _("Inactive products can't be added to cart")
             )
-        if not product_item.stock.available(kwargs.get("_quantity", 1)):
+        if not product_item.stock.available(kwargs.get("quantity", 1)):
             raise ValidationError(_("Not enough product in stock"))
             # maybe need to deduct from stock to reserve items for order
             # but then need to keep notice of cleansing the cart periodically
@@ -827,27 +833,26 @@ class CartItem(models.Model):
         return cart_item
 
     def to_dict(self) -> dict:
-        # d = self.__dict__.copy()
-        # d.pop('_state', None)
-        # d.pop('created_at', None)
-        # d.pop('updated_at', None)
-        # d.update({'cart': self.cart})
-        # return d
         return {
-            "cart": self.cart,
+            # "cart": self.cart,
             "product": self.product,
             "product_name": self.product_name,
             "sku": self.sku,
-            "quantity": self._quantity,
-            "regular_price": self.regular_price,
-            "discount": self.discount,
-            "fianl_price": self.final_price,
-            "marked_for_order": self.marked_for_order,
+            "quantity": self.quantity,
+            # "regular_price": self.regular_price,
+            # "discount": self.discount,
+            "price": self.final_price,
+            "sum": self.get_final_sum()
+            # "marked_for_order": self.marked_for_order,
         }
 
     def add_quantity(self, quantity: int) -> None:
-        self._quantity += quantity
-        self.save(update_fields=("_quantity",))
+        self.quantity += quantity
+        self.save(update_fields=("quantity",))
+
+    @decimalize()
+    def get_final_sum(self) -> Decimal:
+        return self.final_price * self.quantity
 
     # view behavior:
     # def add_cart_item(request, prod_id, cart_id, quantity=1):
@@ -940,7 +945,7 @@ class Order(models.Model):
         if stat := getattr(self.OrderStatus, value, None):
             self._status = stat
         else:
-            raise ValueError(f"{value} is not a valid choice fo OrderStatus")
+            raise ValueError(f"{value} is not a valid choice for OrderStatus")
 
     def get_total_sum(self) -> float:
         return round(
@@ -1019,7 +1024,7 @@ class OrderItem(models.Model):
         kwargs.update(data)
         cart_item.delete()
         # `sum` field is not handled yet
-        return cls.objects.create(order, **kwargs)
+        return cls.objects.create(order=order, **kwargs)
 
 
 class Comment(models.Model):
