@@ -952,8 +952,14 @@ class Order(models.Model):
             OrderItem.objects.filter(order_id=self.id).aggregate(Sum("sum")), 2
         )
 
+    def cancel(self):
+        for item in self.items:
+            item.revert()
+        self.status = self.OrderStatus.CANCELED_BY_SELLER
+        self.save(update_fields=("status",))
+
     @classmethod
-    def create_from_cart(cls, customer):
+    def create_from_cart(cls, customer: Customer):
         order, _ = cls.objects.get_or_create(
             customer, _status=cls.OrderStatus.PENDING
         )
@@ -962,7 +968,8 @@ class Order(models.Model):
         ).first()
         cart_items = cart.items.all()
         for item in cart_items:
-            OrderItem.from_cart_item(order, item)
+            if item.marked_for_order:
+                OrderItem.from_cart_item(order, item)
 
 
 class OrderItem(models.Model):
@@ -1018,12 +1025,23 @@ class OrderItem(models.Model):
         null=True,
     )
 
+    def revert(self):
+        product_item = ProductItem.objects.select_related("stock").get(
+            id=self.product_id
+        )
+        product_item.stock.add(self.quantity)
+
     @classmethod
     def from_cart_item(cls, order: Order, cart_item: CartItem, **kwargs):
         data = cart_item.to_dict()
+        if product := data.get("product"):
+            stock = product.stock
+            quantity = data.get("quantity", 1)
+            if not stock.available(quantity):
+                raise ValidationError(_("Not enough product in stock"))
+            stock.deduct(quantity)
         kwargs.update(data)
         cart_item.delete()
-        # `sum` field is not handled yet
         return cls.objects.create(order=order, **kwargs)
 
 
