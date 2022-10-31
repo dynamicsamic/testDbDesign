@@ -377,14 +377,25 @@ class ProductAttributeValue(models.Model):
     """Value of a product attribute."""
 
     class MyMan(models.Manager):
-        def get_queryset(self) -> QuerySet:
-            """Join related object's data to main queryset."""
-            queryset = super().get_queryset()
-            return queryset.select_related("attr")
+        def create(self, **kwargs):
+            if attr := kwargs.get("attr"):
+                kwargs.update({"attr_name": attr.name})
+            return super().create(**kwargs)
+
+        # def get_queryset(self) -> QuerySet:
+        #    """Join related object's data to main queryset."""
+        #    queryset = super().get_queryset()
+        #    return queryset.select_related("attr")
 
     # objects = SelectRelatedManager(select_related_model_name="attr")
     attr = models.ForeignKey(
         ProductAttribute, related_name="values", on_delete=models.PROTECT
+    )
+    attr_name = models.CharField(
+        _("product item attribute name"),
+        max_length=150,
+        help_text=_("optional, max_len: 150"),
+        blank=True,
     )
     value = models.CharField(
         _("attribute value"),
@@ -395,7 +406,7 @@ class ProductAttributeValue(models.Model):
     objects = MyMan()  # related_descriptor conflict
 
     def __str__(self):
-        return f"{self.attr}: {self.value}"
+        return f"{self.attr_name}: {self.value}"
 
 
 class ProductItemManager(models.Manager):
@@ -426,21 +437,25 @@ class ProductItem(models.Model):
     """Particular item of product with specific attributes."""
 
     # think about favorites
-
+    product_set = models.ForeignKey(
+        ProductSet, related_name="items", on_delete=models.CASCADE
+    )
+    favorited_by = models.ManyToManyField(
+        Customer,
+        related_name="favorites",
+        help_text=_("optional, customers liked the product"),
+    )
     product_name = models.CharField(
         _("Product name"),
         max_length=150,
         help_text=_("optional, max_len: 150"),
         blank=True,
-        null=True,
+        # null=True,
     )
     sku = models.CharField(
         _("stock keeping unit"),
         max_length=20,
         help_text="required, max_len: 20",
-    )
-    product_set = models.ForeignKey(
-        ProductSet, related_name="items", on_delete=models.CASCADE
     )
     attrs = models.ManyToManyField(
         ProductAttributeValue,
@@ -615,17 +630,19 @@ class Stock(models.Model):
         help_text=_("format: Y-m-d H:M:S"),
     )
 
-    def add(self, value: int) -> None:
+    def add(self, value: int, commit: bool = True) -> None:
         if value >= MAX_AMOUNT_ADDED:
             raise TooBigToAdd(value)
         self.current_amount += value
-        self.save(update_fields=("current_amount",))
+        if commit:
+            self.save(update_fields=("current_amount",))
 
-    def deduct(self, value: int) -> None:
+    def deduct(self, value: int, commit: bool = True) -> None:
         if value > self.current_amount:
             raise NotEnoughProductLeft(self)
         self.current_amount -= value
-        self.save(update_fields=("current_amount",))
+        if commit:
+            self.save(update_fields=("current_amount",))
 
     def available(self, amount: int) -> bool:
         return self.current_amount >= amount
@@ -806,7 +823,8 @@ class CartItem(models.Model):
         """Create CartItem from ProductItem.
         Prevent creating cart items from inactive products
         and products that don't have enough stock items.
-        Fetch stock data along with product item to prevent additional sql queries.
+        Fetch stock data along with the product item
+        to prevent additional db queries.
         """
         try:
             cart = Cart.objects.get(customer_id=customer_id)
@@ -853,6 +871,14 @@ class CartItem(models.Model):
     @decimalize()
     def get_final_sum(self) -> Decimal:
         return self.final_price * self.quantity
+
+    def mark_for_order(self) -> None:
+        self.marked_for_order = True
+        self.save(update_fields=("marked_for_order",))
+
+    def unmark_for_order(self) -> None:
+        self.marked_for_order = False
+        self.save(update_fields=("marked_for_order",))
 
     # view behavior:
     # def add_cart_item(request, prod_id, cart_id, quantity=1):
@@ -903,7 +929,6 @@ class Order(models.Model):
         auto_now=True,
         help_text=_("format: Y-m-d H:M:S"),
     )
-    # status = ...
     # shipment_method = ...
     # payment_method = ...
     total_sum = models.PositiveIntegerField(
@@ -942,7 +967,7 @@ class Order(models.Model):
 
     @status.setter
     def status(self, value: str) -> None:
-        if stat := getattr(self.OrderStatus, value, None):
+        if stat := getattr(self.OrderStatus, value.upper(), None):
             self._status = stat
         else:
             raise ValueError(f"{value} is not a valid choice for OrderStatus")
@@ -952,11 +977,16 @@ class Order(models.Model):
             OrderItem.objects.filter(order_id=self.id).aggregate(Sum("sum")), 2
         )
 
+    def get_total_discount(self) -> float:
+        return round(
+            OrderItem.objects.filter(order_id=self.id).aggregate(Sum("sum")), 2
+        )
+
     def cancel(self):
         for item in self.items:
             item.revert()
-        self.status = self.OrderStatus.CANCELED_BY_SELLER
-        self.save(update_fields=("status",))
+        self.status = "canceled_by_seller"
+        self.save(update_fields=("_status",))
 
     @classmethod
     def create_from_cart(cls, customer: Customer):
@@ -970,6 +1000,10 @@ class Order(models.Model):
         for item in cart_items:
             if item.marked_for_order:
                 OrderItem.from_cart_item(order, item)
+
+        order.final_sum = order.get_total_sum()
+        order.save(update_fields=("final_sum",))
+        # order.total_discount = order.get
 
 
 class OrderItem(models.Model):
@@ -1025,21 +1059,44 @@ class OrderItem(models.Model):
         null=True,
     )
 
-    def revert(self):
-        product_item = ProductItem.objects.select_related("stock").get(
-            id=self.product_id
+    def revert(self) -> None:
+        """Restore the quantity of stock units when the order is canceled.
+        Set quantity item quantity to 0.
+        """
+        stock = Stock.objects.filter(product_id=self.product_id).first()
+        stock.add(self.quantity, commit=False)
+        stock.items_sold -= self.quantity
+        stock.save(
+            update_fields=(
+                "current_amount",
+                "items_sold",
+            )
         )
-        product_item.stock.add(self.quantity)
+        self.quantity = 0
+        self.save(update_fields=("quantity",))
 
     @classmethod
     def from_cart_item(cls, order: Order, cart_item: CartItem, **kwargs):
+        """Create an order item from a cart item."""
         data = cart_item.to_dict()
         if product := data.get("product"):
             stock = product.stock
-            quantity = data.get("quantity", 1)
-            if not stock.available(quantity):
-                raise ValidationError(_("Not enough product in stock"))
-            stock.deduct(quantity)
+            # quantity = data.get("quantity", 1)
+            # if not stock.available(quantity):
+            #    raise ValidationError(_("Not enough product in stock"))
+            # stock.deduct(quantity)
+            try:
+                stock.deduct(quantity := data.get("quantity", 1), commit=False)
+            except NotEnoughProductLeft as e:
+                print(f"{e(quantity)}")
+                raise
+            stock.items_sold += quantity
+            stock.save(
+                update_fields=(
+                    "current_amount",
+                    "items_sold",
+                )
+            )
         kwargs.update(data)
         cart_item.delete()
         return cls.objects.create(order=order, **kwargs)
