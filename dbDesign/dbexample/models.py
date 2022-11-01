@@ -686,15 +686,20 @@ class Cart(models.Model):
         self.items.all().delete()
 
     def get_initial_sum(self) -> float:
-        val = CartItem.objects.filter(cart_id=self.id).aggregate(
-            Sum("regular_price")
+        val = (
+            CartItem.objects.filter(cart_id=self.id)
+            .aggregate(Sum("regular_price"))
+            .get("final_price", 0)
         )
         return round(val, 2)
 
     def get_total_sum(self) -> float:
-        val = CartItem.objects.filter(cart_id=self.id).aggregate(
-            Sum("final_price")
+        val = (
+            CartItem.objects.filter(cart_id=self.id)
+            .aggregate(Sum("final_price"))
+            .get("final_price", 0)
         )
+
         return round(val, 2)
 
     def get_total_discount(self) -> float:
@@ -916,8 +921,8 @@ class Order(models.Model):
         _("Order status"),
         max_length=50,
         choices=OrderStatus.choices,
-        default=OrderStatus.CREATED,
-        help_text=_("required, default: created"),
+        default=OrderStatus.PENDING,
+        help_text=_("required, default: pending"),
     )
     created_at = models.DateTimeField(
         _("order creation time"),
@@ -974,7 +979,10 @@ class Order(models.Model):
 
     def get_total_sum(self) -> float:
         return round(
-            OrderItem.objects.filter(order_id=self.id).aggregate(Sum("sum")), 2
+            OrderItem.objects.filter(order_id=self.id)
+            .aggregate(Sum("sum"))
+            .get("sum", 0),
+            2,
         )
 
     def get_total_discount(self) -> float:
@@ -1015,7 +1023,7 @@ class OrderItem(models.Model):
     )
     product = models.ForeignKey(
         ProductItem,
-        related_name="in order",
+        related_name="order_items",
         on_delete=models.PROTECT,
         verbose_name="Ordered product",
         blank=True,

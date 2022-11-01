@@ -18,3 +18,4 @@ class Command(BaseCommand):
         call_command("loaddata", "prod_attr_db_fixture.json")
         call_command("loaddata", "prod_attr_values_db_fixture.json")
         call_command("loaddata", "prod_item_db_fixture.json")
+        call_command("loaddata", "stock_db_fixture.json")
