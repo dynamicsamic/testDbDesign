@@ -17,23 +17,16 @@ from .utils import decimalize
 MAX_AMOUNT_ADDED = 10000
 
 
-class SelectRelatedManager(models.Manager):
-    def __init__(self, select_related_model_name: str) -> None:
-        super().__init__()
-        self.select_related_model_name = select_related_model_name
-
-    def get_queryset(self) -> QuerySet:
-        """Join related object's data to main queryset."""
-        queryset = super().get_queryset()
-        return queryset.select_related(self.select_related_model_name)
-
-
-class CustomerManager(SelectRelatedManager):
+class CustomerManager(models.Manager):
     def create(self, **kwargs):
         """Create an empty cart when creating a customer."""
         customer = super().create(**kwargs)
         Cart.objects.create(customer=customer)
         return customer
+
+    def get_queryset(self) -> QuerySet:
+        """Fetch user data when querying for customer."""
+        return super().get_queryset().select_related("user")
 
 
 class BaseUser(AbstractUser):
@@ -61,7 +54,7 @@ class Customer(models.Model):
         FROZEN = "frozen"
         ARCHIVED = "archived"
 
-    objects = CustomerManager("user")
+    objects = CustomerManager()
 
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -683,26 +676,31 @@ class Cart(models.Model):
     )
 
     def clear_out(self):
+        """Clean the cart."""
         self.items.all().delete()
+        self.status = self.CartStatus.EMPTY
+        self.save(update_fields=("status",))
 
     def get_initial_sum(self) -> float:
-        val = (
-            CartItem.objects.filter(cart_id=self.id)
+        """Get sum of all items in cart before discount applied."""
+        return round(
+            *CartItem.objects.filter(cart_id=self.id)
             .aggregate(Sum("regular_price"))
-            .get("final_price", 0)
+            .values(),
+            2,
         )
-        return round(val, 2)
 
     def get_total_sum(self) -> float:
-        val = (
-            CartItem.objects.filter(cart_id=self.id)
+        """Get sum of all items in cart after dicsount added."""
+        return round(
+            *CartItem.objects.filter(cart_id=self.id)
             .aggregate(Sum("final_price"))
-            .get("final_price", 0)
+            .values(),
+            2,
         )
 
-        return round(val, 2)
-
     def get_total_discount(self) -> float:
+        """Get sum of total cart discount."""
         return round(self.get_initial_sum() - self.get_total_sum(), 2)
 
     def __str__(self) -> str:
@@ -839,7 +837,7 @@ class CartItem(models.Model):
         except (Cart.DoesNotExist, ProductItem.DoesNotExist) as e:
             print(e)
             raise
-        if not product_item.is_active():
+        if not product_item.is_active:
             raise ValidationError(
                 _("Inactive products can't be added to cart")
             )
