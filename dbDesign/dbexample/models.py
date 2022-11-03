@@ -521,7 +521,8 @@ class ProductItem(models.Model):
             pass
 
     @property
-    def discounted_price(self) -> float:
+    @decimalize()
+    def discounted_price(self) -> Decimal:
         price = float(self._price) * ((100 - self.discount) / 100)
         return round(price, 2)
 
@@ -533,9 +534,9 @@ class ProductItem(models.Model):
         return {
             "product_name": self.product_name,
             "sku": self.sku,
-            "regular_price": self._price,
+            "regular_price": self._price.to_eng_string(),
             "discount": self.discount,
-            "final_price": self.discounted_price,
+            "final_price": self.discounted_price.to_eng_string(),
         }
 
 
@@ -681,27 +682,35 @@ class Cart(models.Model):
         self.status = self.CartStatus.EMPTY
         self.save(update_fields=("status",))
 
-    def get_initial_sum(self) -> float:
+    def get_initial_sum(self) -> Decimal:
         """Get sum of all items in cart before discount applied."""
-        return round(
-            *CartItem.objects.filter(cart_id=self.id)
-            .aggregate(Sum("regular_price"))
-            .values(),
-            2,
-        )
+        if res := self.items.aggregate(initial=Sum("regular_price")).get(
+            "initial"
+        ):
+            return res
+        return Decimal("0.00")
+        # return round(
+        #    *CartItem.objects.filter(cart_id=self.id)
+        #    .aggregate(Sum("regular_price"))
+        #    .values(),
+        #    2,
+        # )
 
     def get_total_sum(self) -> float:
         """Get sum of all items in cart after dicsount added."""
-        return round(
-            *CartItem.objects.filter(cart_id=self.id)
-            .aggregate(Sum("final_price"))
-            .values(),
-            2,
-        )
+        if res := self.items.aggregate(total=Sum("final_price")).get("total"):
+            return res
+        return Decimal("0.00")
+        # return round(
+        #    *CartItem.objects.filter(cart_id=self.id)
+        #    .aggregate(Sum("final_price"))
+        #    .values(),
+        #    2,
+        # )
 
-    def get_total_discount(self) -> float:
+    def get_total_discount(self) -> Decimal:
         """Get sum of total cart discount."""
-        return round(self.get_initial_sum() - self.get_total_sum(), 2)
+        return self.get_initial_sum() - self.get_total_sum()
 
     def __str__(self) -> str:
         return str(self.customer_id)
