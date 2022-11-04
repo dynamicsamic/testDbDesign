@@ -696,7 +696,7 @@ class Cart(models.Model):
         #    2,
         # )
 
-    def get_total_sum(self) -> float:
+    def get_total_sum(self) -> Decimal:
         """Get sum of all items in cart after dicsount added."""
         if res := self.items.aggregate(total=Sum("final_price")).get("total"):
             return res
@@ -710,7 +710,11 @@ class Cart(models.Model):
 
     def get_total_discount(self) -> Decimal:
         """Get sum of total cart discount."""
-        return self.get_initial_sum() - self.get_total_sum()
+        if res := self.items.aggregate(
+            discount=Sum("regular_price") - Sum("final_price")
+        ).get("discount"):
+            return res
+        return Decimal("0.00")
 
     def __str__(self) -> str:
         return str(self.customer_id)
@@ -984,18 +988,16 @@ class Order(models.Model):
         else:
             raise ValueError(f"{value} is not a valid choice for OrderStatus")
 
-    def get_total_sum(self) -> float:
-        return round(
-            OrderItem.objects.filter(order_id=self.id)
-            .aggregate(Sum("sum"))
-            .get("sum", 0),
-            2,
-        )
+    def get_total_sum(self) -> Decimal:
+        if res := self.items.aggregate(total=Sum("sum")).get("total"):
+            return res
+        return Decimal("0.00")
 
     def get_total_discount(self) -> float:
-        return round(
-            OrderItem.objects.filter(order_id=self.id).aggregate(Sum("sum")), 2
-        )
+        # return round(
+        #    OrderItem.objects.filter(order_id=self.id).aggregate(Sum("sum")), 2
+        # )
+        pass
 
     def cancel(self):
         for item in self.items:
@@ -1006,7 +1008,7 @@ class Order(models.Model):
     @classmethod
     def create_from_cart(cls, customer: Customer):
         order, _ = cls.objects.get_or_create(
-            customer, _status=cls.OrderStatus.PENDING
+            customer=customer, _status=cls.OrderStatus.PENDING
         )
         cart = Cart.objects.filter(
             customer_id=customer.id, status=Cart.CartStatus.IN_PROGRESS
