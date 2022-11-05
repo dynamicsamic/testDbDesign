@@ -416,7 +416,9 @@ class ProductItemManager(models.Manager):
             else:
                 p_name = p_set.name
             kwargs.update({"product_name": p_name})
-        super().create(**kwargs)
+        product_item = super().create(**kwargs)
+        Stock.objects.create(product=product_item, units="pcs")
+        return product_item
 
         # obj = super().create(**kwargs)
         # p_name = obj.product_set.name
@@ -1000,7 +1002,7 @@ class Order(models.Model):
         pass
 
     def cancel(self):
-        for item in self.items:
+        for item in self.items.all():
             item.revert()
         self.status = "canceled_by_seller"
         self.save(update_fields=("_status",))
@@ -1020,7 +1022,6 @@ class Order(models.Model):
 
         order.final_sum = order.get_total_sum()
         order.save(update_fields=("final_sum",))
-        # order.total_discount = order.get
 
 
 class OrderItem(models.Model):
