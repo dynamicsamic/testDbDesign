@@ -242,6 +242,22 @@ class Brand(models.Model):
         return self.name
 
 
+class ProductAttribute(models.Model):
+    """Attribute of a product.
+    Like `cpu`, `storage`, `RAM` etc.
+    """
+
+    name = models.CharField(
+        _("product item attribute name"),
+        max_length=150,
+        unique=True,
+        help_text=_("required, max_len: 150"),
+    )
+
+    def __str__(self):
+        return self.name
+
+
 class ProductType(models.Model):
     name = models.CharField(
         _("type of product"),
@@ -250,12 +266,35 @@ class ProductType(models.Model):
         help_text=_("required, max_len: 150"),
     )
     logo = models.CharField(_("replace this to imagefield"), max_length=30)
-
-    # maybe add an `attribute_collection (attr_set)` M2M field to have all
-    # product attributes predefined before creation of a product_item
+    attribute_set = models.ManyToManyField(
+        ProductAttribute,
+        related_name="product_types",
+        through="ProductTypeToAttributeLinkTable",
+    )
 
     def __str__(self):
         return self.name
+
+
+class ProductTypeToAttributeLinkTable(models.Model):
+    """Link table for product type and attribute values."""
+
+    product_type = models.ForeignKey(ProductType, on_delete=models.PROTECT)
+    attr = models.ForeignKey(
+        ProductAttribute,
+        on_delete=models.PROTECT,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["product_type", "attr"],
+                name="unique_product_type_attr",
+            )
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.product_type_id}: {self.attr_id}"
 
 
 class ProductCategory(models.Model):
@@ -350,58 +389,6 @@ class ProductSet(models.Model):
         return self.name
 
 
-class ProductAttribute(models.Model):
-    """Attribute of a product.
-    Like `cpu`, `storage`, `RAM` etc.
-    """
-
-    name = models.CharField(
-        _("product item attribute name"),
-        max_length=150,
-        unique=True,
-        help_text=_("required, max_len: 150"),
-    )
-
-    def __str__(self):
-        return self.name
-
-
-class ProductAttributeValue(models.Model):
-    """Value of a product attribute."""
-
-    class MyMan(models.Manager):
-        def create(self, **kwargs):
-            if attr := kwargs.get("attr"):
-                kwargs.update({"attr_name": attr.name})
-            return super().create(**kwargs)
-
-        # def get_queryset(self) -> QuerySet:
-        #    """Join related object's data to main queryset."""
-        #    queryset = super().get_queryset()
-        #    return queryset.select_related("attr")
-
-    # objects = SelectRelatedManager(select_related_model_name="attr")
-    attr = models.ForeignKey(
-        ProductAttribute, related_name="values", on_delete=models.PROTECT
-    )
-    attr_name = models.CharField(
-        _("product item attribute name"),
-        max_length=150,
-        help_text=_("optional, max_len: 150"),
-        blank=True,
-    )
-    value = models.CharField(
-        _("attribute value"),
-        max_length=255,
-        unique=True,
-        help_text=_("required, max_length: 255"),
-    )
-    objects = MyMan()  # related_descriptor conflict
-
-    def __str__(self):
-        return f"{self.attr_name}: {self.value}"
-
-
 class ProductItemManager(models.Manager):
     def create(self, **kwargs):
         # product_name
@@ -411,7 +398,9 @@ class ProductItemManager(models.Manager):
         if p_set:
             if attrs:
                 p_name = (
-                    p_set.name + " " + " ".join([attr.value for attr in attrs])
+                    p_set.name
+                    + " "
+                    + " ".join([value for value in attrs.values()])
                 )
             else:
                 p_name = p_set.name
@@ -452,10 +441,9 @@ class ProductItem(models.Model):
         max_length=20,
         help_text="required, max_len: 20",
     )
-    attrs = models.ManyToManyField(
-        ProductAttributeValue,
-        related_name="product_items",
-        through="ProductToAttributeLinkTable",
+    attrs = models.JSONField(
+        _("Attributes for product item "),
+        help_text=_("required: dict of attr:vaue pairs"),
     )
     # images = models.ForeignKey(
     #    ImageSet, related_name="product_items", on_delete=models.SET_DEFAULT
@@ -540,28 +528,6 @@ class ProductItem(models.Model):
             "discount": self.discount,
             "final_price": self.discounted_price.to_eng_string(),
         }
-
-
-class ProductToAttributeLinkTable(models.Model):
-    """Link table for product items and attribute values."""
-
-    # Maybe it's more convinient to include attrs and their values to
-    # ProductItems JSONField. Need to think about it.
-
-    product_item = models.ForeignKey(ProductItem, on_delete=models.PROTECT)
-    attr_values = models.ForeignKey(
-        ProductAttributeValue,
-        related_name="prod_items",
-        on_delete=models.PROTECT,
-    )
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["product_item", "attr_values"],
-                name="unique_product_attr",
-            )
-        ]
 
 
 """
