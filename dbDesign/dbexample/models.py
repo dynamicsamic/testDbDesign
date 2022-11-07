@@ -391,22 +391,28 @@ class ProductSet(models.Model):
 
 class ProductItemManager(models.Manager):
     def create(self, **kwargs):
+        """On creation set product item name generated from its product set name and attrs.
+        Create stock and set its initial amount to quantity if passed from user.
+        """
         # product_name
         # kwargs.update({'product_name'})
         p_set = kwargs.get("product_set")
         attrs = kwargs.get("attrs")
-        if p_set:
-            if attrs:
-                p_name = (
-                    p_set.name
-                    + " "
-                    + " ".join([value for value in attrs.values()])
-                )
-            else:
-                p_name = p_set.name
-            kwargs.update({"product_name": p_name})
+        # print(attrs.values())
+        if attrs:
+            p_name = (
+                p_set.name
+                + " "
+                + " ".join([value for value in attrs.values()])
+            )
+        else:
+            p_name = p_set.name
+        kwargs.update({"product_name": p_name})
         product_item = super().create(**kwargs)
-        Stock.objects.create(product=product_item, units="pcs")
+        stock_qty = kwargs.get("quantity", 0)
+        Stock.objects.create(
+            product=product_item, unit="pcs", initial_amount=stock_qty
+        )
         return product_item
 
         # obj = super().create(**kwargs)
@@ -448,7 +454,7 @@ class ProductItem(models.Model):
     # images = models.ForeignKey(
     #    ImageSet, related_name="product_items", on_delete=models.SET_DEFAULT
     # )
-    _price = models.DecimalField(
+    price = models.DecimalField(
         _("Product item price"),
         max_digits=9,
         decimal_places=2,
