@@ -400,19 +400,17 @@ class ProductItemManager(models.Manager):
         attrs = kwargs.get("attrs")
         # print(attrs.values())
         if attrs:
-            p_name = (
-                p_set.name
-                + " "
-                + " ".join([value for value in attrs.values()])
-            )
+            p_name = p_set.name + " " + " ".join(attrs.values())
         else:
             p_name = p_set.name
         kwargs.update({"product_name": p_name})
         product_item = super().create(**kwargs)
-        stock_qty = kwargs.get("quantity", 0)
-        Stock.objects.create(
-            product=product_item, unit="pcs", initial_amount=stock_qty
-        )
+        # CREATE STOCK INSTANCE ALONG WITH PRODUCT ITEM
+        # MANUALLY IN FORMS OR SERIALIZERS
+        # stock_qty = kwargs.get("quantity", 0)
+        # Stock.objects.create(
+        #    product=product_item, unit="pcs", initial_amount=stock_qty
+        # )
         return product_item
 
         # obj = super().create(**kwargs)
@@ -572,12 +570,12 @@ class Stock(models.Model):
     unit = models.CharField(
         _("product unit"), max_length=20, help_text=_("required, max_len: 20")
     )
-    initial_amount = models.PositiveIntegerField(
-        _("initial amount of product"),
-        default=0,
-        help_text=_("required, default: 0"),
-    )
-    current_amount = models.PositiveIntegerField(
+    # initial_amount = models.PositiveIntegerField(
+    #    _("initial amount of product"),
+    #    default=0,
+    #    help_text=_("required, default: 0"),
+    # )
+    amount = models.PositiveIntegerField(
         _("current amount of product"),
         default=0,
         help_text=_("required, default: 0"),
@@ -598,25 +596,38 @@ class Stock(models.Model):
         help_text=_("format: Y-m-d H:M:S"),
     )
 
-    def add(self, value: int, commit: bool = True) -> None:
-        if value >= MAX_AMOUNT_ADDED:
-            raise TooBigToAdd(value)
-        self.current_amount += value
+    def set(self, value: int, commit: bool = True) -> None:
+        if value < 0 or value > MAX_AMOUNT_ADDED:
+            raise ValidationError(
+                f"Value must be between 0 and {MAX_AMOUNT_ADDED}"
+            )
+        self.amount = value
         if commit:
-            self.save(update_fields=("current_amount",))
+            self.save(update_fields=("amount",))
+
+    def add(self, value: int, commit: bool = True) -> None:
+        if value < 0:
+            raise ValidationError("Value must be greater or equal to 0")
+        if value > MAX_AMOUNT_ADDED:
+            raise TooBigToAdd(value)
+        self.amount += value
+        if commit:
+            self.save(update_fields=("amount",))
 
     def deduct(self, value: int, commit: bool = True) -> None:
-        if value > self.current_amount:
+        if value < 0:
+            raise ValidationError("Value must be greater or equal to 0")
+        if value > self.amount:
             raise NotEnoughProductLeft(self)
-        self.current_amount -= value
+        self.amount -= value
         if commit:
-            self.save(update_fields=("current_amount",))
+            self.save(update_fields=("amount",))
 
     def available(self, amount: int) -> bool:
-        return self.current_amount >= amount
+        return self.amount >= amount
 
     def __str__(self) -> str:
-        return str(self.product_id)
+        return f"Product({self.product_id}): {self.amount}"
 
 
 class Cart(models.Model):
