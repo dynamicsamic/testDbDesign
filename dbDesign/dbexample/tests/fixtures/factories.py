@@ -60,6 +60,25 @@ def set_random_attrs(obj):
     }
 
 
+class UserFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.User
+
+    username = factory.Sequence(lambda _: fake.first_name().lower())
+    email = factory.LazyAttribute(lambda obj: f"{obj.username}@hello.py")
+
+
+class CustomerFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.Customer
+
+    user = factory.Iterator(models.User.objects.all())
+    status = factory.Sequence(
+        lambda _: random.choice(models.Customer.CustomerStatus.values)
+    )
+    phone_number = factory.Sequence(lambda _: fake.phone_number())
+
+
 class ProductAttributeFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.ProductAttribute

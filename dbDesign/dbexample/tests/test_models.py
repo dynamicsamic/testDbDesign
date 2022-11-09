@@ -12,7 +12,7 @@ BRAND_NUM = 14
 PRODUCT_ITEM_NUM = 30
 
 
-class ModelsTestCase(TestCase):
+class DataFactoryMixin:
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -33,29 +33,59 @@ class ModelsTestCase(TestCase):
         cls.product_items = factories.ProductItemFactory.create_batch(
             PRODUCT_ITEM_NUM
         )
-        cls.stock = factories.StockFactory.create_batch(PRODUCT_ITEM_NUM)
+        cls.stockpile = factories.StockFactory.create_batch(PRODUCT_ITEM_NUM)
 
-    def test_stock_fails_to_set_more_than_highest_num(self):
+
+class StockModelTestCase(DataFactoryMixin, TestCase):
+    def setUp(self):
+        self.VALID_STOCK_AMOUNT = 20
+        self.stock = self.stockpile[0]
+
+    def test_stock_set_valid_amount_success(self):
+        self.stock.set(self.VALID_STOCK_AMOUNT)
+        self.stock.refresh_from_db()
+        self.assertEquals(self.stock.amount, self.VALID_STOCK_AMOUNT)
+
+    def test_stock_add_valid_amount_success(self):
+        initial_amount = self.stock.amount
+        self.stock.add(self.VALID_STOCK_AMOUNT)
+        self.stock.refresh_from_db()
+        self.assertEquals(
+            self.stock.amount, initial_amount + self.VALID_STOCK_AMOUNT
+        )
+
+    def test_stock_deduct_valid_amount_success(self):
+        initial_amount = self.stock.amount
+        self.stock.deduct(self.VALID_STOCK_AMOUNT)
+        self.stock.refresh_from_db()
+        self.assertEquals(
+            self.stock.amount, initial_amount - self.VALID_STOCK_AMOUNT
+        )
+
+    def test_stock_set_too_big_value_fails(self):
         """Raises specific error when trying to set more than allowed"""
-        stock = self.stock[0]
         with self.assertRaises(ValidationError):
-            stock.set(MAX_AMOUNT_ADDED + 1)
+            self.stock.set(MAX_AMOUNT_ADDED + 1)
 
-    def test_stock_fails_to_add_more_than_highest_num(self):
+    def test_stock_add_too_big_value_fails(self):
         """Raises specific error when trying to add more than allowed"""
-        stock = self.stock[0]
         with self.assertRaises(TooBigToAdd):
-            stock.add(MAX_AMOUNT_ADDED + 1)
+            self.stock.add(MAX_AMOUNT_ADDED + 1)
 
-    def test_stock_fails_to_deduct_more_than_available(self):
+    def test_stock_deduct_more_than_available_fails(self):
         """Raises specific error when trying to deduct more than current amount"""
-        stock = self.stock[0]
         with self.assertRaises(NotEnoughProductLeft):
-            stock.deduct(stock.amount + 1)
+            self.stock.deduct(self.stock.amount + 1)
 
-    def test_stock_fails_operating_negative_numbers(self):
-        stock = self.stock[0]
+    def test_stock_methods_with_negative_numbers_fails(self):
         with self.assertRaises(ValidationError):
-            stock.deduct(-1)
-            stock.add(-1)
-            stock.set(-1)
+            self.stock.deduct(-1)
+            self.stock.add(-1)
+            self.stock.set(-1)
+
+
+class UserModelTestCase(TestCase):
+    def test_smth(self):
+        user = factories.UserFactory.create()
+        customer = factories.CustomerFactory.create()
+        print(user.email, customer.email)
