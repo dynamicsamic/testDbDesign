@@ -1,18 +1,31 @@
 from django.core.exceptions import ValidationError
+from django.db import connection, reset_queries
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 
+from .. import models as models
 from ..exceptions import NotEnoughProductLeft, TooBigToAdd
-from ..models import MAX_AMOUNT_ADDED
 from .fixtures import factories
 
 PRODUCT_TYPE_NUM = 5
 ATTRIBUTE_NUM = 7
-CATEGORY_NUM = VENDOR_NUM = PRODUCT_SET_NUM = 10
+USER_NUM = CATEGORY_NUM = VENDOR_NUM = PRODUCT_SET_NUM = 10
 BRAND_NUM = 14
 PRODUCT_ITEM_NUM = 30
 
 
-class DataFactoryMixin:
+class UserCustomerFactoryMixin:
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.users = factories.UserFactory.create_batch(USER_NUM)
+        cls.customers = factories.CustomerFactory.create_batch(USER_NUM)
+        for user in cls.users:
+            user.set_password(user.password)
+            user.save(update_fields=("password",))
+
+
+class DataFactoryMixin(UserCustomerFactoryMixin):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -65,12 +78,12 @@ class StockModelTestCase(DataFactoryMixin, TestCase):
     def test_stock_set_too_big_value_fails(self):
         """Raises specific error when trying to set more than allowed"""
         with self.assertRaises(ValidationError):
-            self.stock.set(MAX_AMOUNT_ADDED + 1)
+            self.stock.set(models.MAX_AMOUNT_ADDED + 1)
 
     def test_stock_add_too_big_value_fails(self):
         """Raises specific error when trying to add more than allowed"""
         with self.assertRaises(TooBigToAdd):
-            self.stock.add(MAX_AMOUNT_ADDED + 1)
+            self.stock.add(models.MAX_AMOUNT_ADDED + 1)
 
     def test_stock_deduct_more_than_available_fails(self):
         """Raises specific error when trying to deduct more than current amount"""
@@ -83,9 +96,52 @@ class StockModelTestCase(DataFactoryMixin, TestCase):
             self.stock.add(-1)
             self.stock.set(-1)
 
+    def test_foo(self):
+        self.assertTrue(models.User.objects.first())
 
-class UserModelTestCase(TestCase):
-    def test_smth(self):
-        user = factories.UserFactory.create()
-        customer = factories.CustomerFactory.create()
-        print(user.email, customer.email)
+
+class UserModelTestCase(UserCustomerFactoryMixin, TestCase):
+    def setUp(self):
+        self.customer = self.customers[0]
+
+    def test_user_retrieved_along_with_customer_in_get_query(self):
+        target_queries_num = 1
+        with CaptureQueriesContext(connection) as ctx:
+            models.Customer.objects.first()
+            self.assertEquals(len(ctx.captured_queries), target_queries_num)
+
+    def test_user_email_changes_when_changing_customer_email(self):
+        new_email = "customer@hello.py"
+        self.customer.email = new_email
+        self.customer.refresh_from_db()
+        self.assertEquals(self.customer.email, new_email)
+        self.assertEquals(self.customer.email, self.customer.user.email)
+
+    def test_user_first_name_changes_when_changing_customer_first_name_(self):
+        new_first_name = "Tommy"
+        self.customer.first_name = new_first_name
+        self.customer.refresh_from_db()
+        self.assertEquals(self.customer.first_name, new_first_name)
+        self.assertEquals(
+            self.customer.first_name, self.customer.user.first_name
+        )
+
+    def test_user_last_name_changes_when_changing_customer_last_name_(self):
+        new_last_name = "Vercetti"
+        self.customer.last_name = new_last_name
+        self.customer.refresh_from_db()
+        self.assertEquals(self.customer.last_name, new_last_name)
+        self.assertEquals(
+            self.customer.last_name, self.customer.user.last_name
+        )
+
+    def test_customer_username_change_fails(self):
+        new_username = "tommyV"
+        with self.assertRaises(AttributeError):
+            self.customer.username = new_username
+
+    def test_empty_cart_created_with_customer_creation(self):
+        self.assertTrue(self.customer.cart)
+        self.assertEquals(
+            self.customer.cart.status, models.Cart.CartStatus.EMPTY
+        )

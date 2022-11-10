@@ -85,6 +85,7 @@ class Customer(models.Model):
     @email.setter
     def email(self, new_email: str) -> None:
         self.user.email = new_email
+        self.user.save(update_fields=("email",))
 
     @property
     def first_name(self) -> str:
@@ -93,6 +94,7 @@ class Customer(models.Model):
     @first_name.setter
     def first_name(self, new_first_name: str) -> None:
         self.user.first_name = new_first_name
+        self.user.save(update_fields=("first_name",))
 
     @property
     def last_name(self) -> str:
@@ -101,6 +103,7 @@ class Customer(models.Model):
     @last_name.setter
     def last_name(self, new_last_name: str) -> None:
         self.user.last_name = new_last_name
+        self.user.save(update_fields=("last_name",))
 
     @property
     def full_name(self) -> str:
