@@ -110,10 +110,7 @@ class ProductCategoryFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.ProductCategory
 
-    name = factory.Sequence(lambda name: f"prod_cat_name_{name}")
-    slug = factory.Sequence(lambda slug: f"prod_cat_name_{slug}")
-    # name = fake.lexify("prod_cat_name_????????")
-    # slug = fake.lexify("prod_cat_slug_????????")
+    name = factory.Sequence(lambda i: f"category {i}")
 
 
 class VendorFactory(factory.django.DjangoModelFactory):
@@ -141,7 +138,7 @@ class ProductSetFactory(factory.django.DjangoModelFactory):
     p_type = factory.Iterator(models.ProductType.objects.all())
     brand = factory.Iterator(models.Brand.objects.all())
     web_id = factory.Sequence(lambda i: f"product_set_web_id_{i}")
-    slug = factory.Sequence(lambda i: f"product_set_slug_{i}")
+    # slug = factory.Sequence(lambda i: f"product_set_slug_{i}")
     name = factory.Sequence(lambda i: f"product_set{i}")
     # description = fake.text()
     description = factory.Faker("sentence", nb_words=9)

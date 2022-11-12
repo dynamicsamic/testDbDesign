@@ -300,6 +300,9 @@ class ProductTypeToAttributeLinkTable(models.Model):
         return f"{self.product_type_id}: {self.attr_id}"
 
 
+from django.utils.text import slugify
+
+
 class ProductCategory(models.Model):
     """
     Category for products.
@@ -314,7 +317,7 @@ class ProductCategory(models.Model):
     slug = models.SlugField(
         _("product category url"),
         max_length=150,
-        unique=True,
+        blank=True,
         help_text=_(
             "required, allowed=[letters, numbers, hyphens, underscore], max_len: 150"
         ),
@@ -332,6 +335,11 @@ class ProductCategory(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        return super().save(*args, **kwargs)
+
 
 class ProductSet(models.Model):
     """
@@ -347,6 +355,7 @@ class ProductSet(models.Model):
     slug = models.SlugField(
         _("product_set url"),
         max_length=255,
+        blank=True,
         help_text=_(
             "required, allowed=[letters, numbers, hyphens, underscore], max_len: 255"
         ),
@@ -387,6 +396,11 @@ class ProductSet(models.Model):
         auto_now=True,
         help_text=_("format: Y-m-d H:M:S"),
     )
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
