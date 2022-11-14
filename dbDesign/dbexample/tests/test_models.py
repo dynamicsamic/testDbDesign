@@ -97,6 +97,7 @@ class StockModelTestCase(DataFactoryMixin, TestCase):
             self.stock.set(-1)
 
     def test_foo(self):
+        print(self.vendors[0].slug)
         self.assertTrue(models.User.objects.first())
 
 

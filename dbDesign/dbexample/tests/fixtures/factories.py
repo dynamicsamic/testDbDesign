@@ -117,7 +117,7 @@ class VendorFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.Vendor
 
-    name = factory.Sequence(lambda i: f"vendor_{i}")
+    name = factory.Sequence(lambda i: f"Vendor {i}")
     description = fake.text()
 
 
