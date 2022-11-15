@@ -7,7 +7,7 @@ from faker import Faker
 fake = Faker()
 
 ATTRIBUTE_NUM = 7
-CATEGORY_NUM = VENDOR_NUM = PRODUCT_SET_NUM = 10
+USER_NUM = CATEGORY_NUM = VENDOR_NUM = PRODUCT_SET_NUM = 10
 BRAND_NUM = 14
 PRODUCT_ITEM_NUM = 30
 attribute_names = [
@@ -84,7 +84,7 @@ class ProductAttributeFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.ProductAttribute
 
-    name = factory.Sequence(lambda i: f"attribute{i}")
+    name = factory.Sequence(lambda i: f"Attribute {i}")
     # name = factory.Iterator(attribute_names)
 
 
@@ -92,7 +92,7 @@ class ProductTypeFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.ProductType
 
-    name = factory.Sequence(lambda n: f"prod_type{n}")
+    name = factory.Sequence(lambda n: f"Product Type {n}")
     logo = factory.Sequence(lambda i: f"logo_{i}.png")
 
     @factory.post_generation
@@ -135,8 +135,14 @@ class ProductSetFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.ProductSet
 
-    p_type = factory.Iterator(models.ProductType.objects.all())
-    brand = factory.Iterator(models.Brand.objects.all())
+    #    p_type = factory.Iterator(models.ProductType.objects.all())
+    p_type = factory.Sequence(
+        lambda _: random.choice(models.ProductType.objects.all())
+    )
+    # brand = factory.Iterator(models.Brand.objects.all())
+    brand = factory.Sequence(
+        lambda _: random.choice(models.Brand.objects.all())
+    )
     web_id = factory.Sequence(lambda i: f"product_set_web_id_{i}")
     # slug = factory.Sequence(lambda i: f"product_set_slug_{i}")
     name = factory.Sequence(lambda i: f"product_set{i}")
@@ -178,8 +184,18 @@ class ProductItemFactory(factory.django.DjangoModelFactory):
     is_active = factory.Sequence(
         lambda _: bool(*random.choices((1, 0), weights=(0.8, 0.2)))
     )
-
+    _view_count = factory.Sequence(lambda _: fake.pyint())
     made_in = factory.Sequence(lambda _: fake.country())
+
+    @factory.post_generation
+    def favorited_by(self, create, extracted, **kwargs):
+        if not create or not extracted:
+            return
+
+        if extracted:
+            extracted = randomize(extracted, USER_NUM)
+            for user in extracted:
+                self.favorited_by.add(user)
 
 
 class StockFactory(factory.django.DjangoModelFactory):
