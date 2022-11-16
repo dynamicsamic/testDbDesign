@@ -459,7 +459,7 @@ class ProductItem(models.Model):
     # images = models.ForeignKey(
     #    ImageSet, related_name="product_items", on_delete=models.SET_DEFAULT
     # )
-    price = models.DecimalField(
+    regular_price = models.DecimalField(
         _("Product item price"),
         max_digits=9,
         decimal_places=2,
@@ -469,9 +469,9 @@ class ProductItem(models.Model):
         _("Discount rate (integer)"),
         default=0,
         help_text=_("required, default: 0"),
-        validators=[MaxValueValidator(99)],
+        validators=[MaxValueValidator(99)],  # this only works with ModelForm
     )
-    # final_price = models.DecimalField(
+    # discounted_price = models.DecimalField(
     #    _("Product item final price"),
     #    max_digits=9,
     #    decimal_paces=2,
@@ -502,6 +502,13 @@ class ProductItem(models.Model):
 
     objects = ProductItemManager()
 
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(discount__lt=100), name="discount_less_than_100"
+            )
+        ]
+
     def __str__(self):
         return self.product_name
 
@@ -509,23 +516,24 @@ class ProductItem(models.Model):
     def views(self) -> int:
         return self._view_count
 
-    @property
-    def price(self) -> Decimal:
-        return self._price
-
-    @price.setter
-    def price(self, value) -> None:
-        try:
-            self._price = Decimal(format(value, ".2f"))
-            self.save(update_fields=("_price",))
-        except ValueError:
-            pass
+    # @property
+    # def price(self) -> Decimal:
+    #    return self._price
+    #
+    # @price.setter
+    # def price(self, value) -> None:
+    #    try:
+    #        self._price = Decimal(format(value, ".2f"))
+    #        self.save(update_fields=("_price",))
+    #    except ValueError:
+    #        pass
 
     @property
     @decimalize()
     def discounted_price(self) -> Decimal:
-        price = float(self._price) * ((100 - self.discount) / 100)
-        return round(price, 2)
+        return float(self.regular_price) * ((100 - self.discount) / 100)
+        # price = float(self._price) * ((100 - self.discount) / 100)
+        # return round(price, 2)
 
     def increment_view_count(self) -> None:
         self._view_count += 1
@@ -535,9 +543,9 @@ class ProductItem(models.Model):
         return {
             "product_name": self.product_name,
             "sku": self.sku,
-            "regular_price": self._price.to_eng_string(),
+            "regular_price": self.regular_price.to_eng_string(),
             "discount": self.discount,
-            "final_price": self.discounted_price.to_eng_string(),
+            "discounted_price": self.discounted_price.to_eng_string(),
         }
 
 
@@ -690,12 +698,14 @@ class Cart(models.Model):
 
     def get_total_sum(self) -> Decimal:
         """Get sum of all items in cart after dicsount added."""
-        if res := self.items.aggregate(total=Sum("final_price")).get("total"):
+        if res := self.items.aggregate(total=Sum("discounted_price")).get(
+            "total"
+        ):
             return res
         return Decimal("0.00")
         # return round(
         #    *CartItem.objects.filter(cart_id=self.id)
-        #    .aggregate(Sum("final_price"))
+        #    .aggregate(Sum("discounted_price"))
         #    .values(),
         #    2,
         # )
@@ -703,7 +713,7 @@ class Cart(models.Model):
     def get_total_discount(self) -> Decimal:
         """Get sum of total cart discount."""
         if res := self.items.aggregate(
-            discount=Sum("regular_price") - Sum("final_price")
+            discount=Sum("regular_price") - Sum("discounted_price")
         ).get("discount"):
             return res
         return Decimal("0.00")
@@ -792,7 +802,7 @@ class CartItem(models.Model):
         blank=True,
         null=True,
     )
-    final_price = models.DecimalField(
+    discounted_price = models.DecimalField(
         _("Discounted cart item price"),
         max_digits=9,
         decimal_places=2,
@@ -867,7 +877,7 @@ class CartItem(models.Model):
             "quantity": self.quantity,
             # "regular_price": self.regular_price,
             # "discount": self.discount,
-            "price": self.final_price,
+            "price": self.discounted_price,
             "sum": self.get_final_sum()
             # "marked_for_order": self.marked_for_order,
         }
@@ -878,7 +888,7 @@ class CartItem(models.Model):
 
     @decimalize()
     def get_final_sum(self) -> Decimal:
-        return self.final_price * self.quantity
+        return self.discounted_price * self.quantity
 
     def mark_for_order(self) -> None:
         self.marked_for_order = True

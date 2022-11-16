@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, connection, reset_queries
 from django.test import TestCase
@@ -207,13 +209,50 @@ class ProdSetProdItemStockModelsTestCase(DataFactoryMixin, TestCase):
     def test_prod_set_has_auto_generated_slug_field(self):
         self.assertTrue(self.p_set.slug)
 
-    def test_product_item_has_custom_manager(self):
+    def test_prod_item_has_custom_manager(self):
         self.assertIsInstance(
             self.p_item._meta.model.objects, models.ProductItemManager
         )
 
-    def test_setting_prod_item_views_raises_error(self):
-        print(self.p_item.views)
+    def test_prod_item_setting_views_raises_error(self):
+        with self.assertRaises(AttributeError):
+            self.p_item.views = 20
+
+    def test_prod_item_increment_view_count_success(self):
+        views = self.p_item.views
+        self.p_item.increment_view_count()
+        self.p_item.refresh_from_db()
+        self.assertEqual(self.p_item.views, views + 1)
+
+    def test_prod_item_discounted_price_returns_correct_result(self):
+        disc_price_generated = self.p_item.discounted_price
+        reg_price = self.p_item.regular_price
+        disc = self.p_item.discount
+        disc_price_counted = float(reg_price) - (
+            float(reg_price) * (disc / 100)
+        )
+        self.assertIsInstance(disc_price_generated, Decimal)
+        self.assertEqual(
+            disc_price_generated.to_eng_string(),
+            format(disc_price_counted, ".2f"),
+        )
+
+    def test_prod_item_creating_item_with_negative_discount_fails(self):
+        with self.assertRaises(IntegrityError):
+            factories.ProductItemFactory.create(
+                pk=PRODUCT_ITEM_NUM + 1, discount=-1
+            )
+
+    def test_prod_item_creating_item_with_too_big_discount_fails(self):
+        with self.assertRaises(IntegrityError):
+            factories.ProductItemFactory.create(
+                pk=PRODUCT_ITEM_NUM + 1, discount=100
+            )
+
+    def test_prod_item_to_dict_returns_correct_result(self):
+        result = self.p_item.to_dict()
+        keys = ()
+        pass
 
     def test_stock_set_valid_amount_success(self):
         self.stock.set(self.VALID_STOCK_AMOUNT)
