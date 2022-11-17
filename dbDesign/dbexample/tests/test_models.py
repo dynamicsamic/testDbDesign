@@ -249,10 +249,7 @@ class ProdSetProdItemStockModelsTestCase(DataFactoryMixin, TestCase):
                 pk=PRODUCT_ITEM_NUM + 1, discount=100
             )
 
-    def test_prod_item_to_dict_returns_correct_result(self):
-        result = self.p_item.to_dict()
-        keys = ()
-        pass
+    # test to_dict method if it's not deprecated
 
     def test_stock_set_valid_amount_success(self):
         self.stock.set(self.VALID_STOCK_AMOUNT)

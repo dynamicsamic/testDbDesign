@@ -66,7 +66,7 @@ class UserFactory(factory.django.DjangoModelFactory):
 
     username = factory.Sequence(lambda i: f"user{i}")
     email = factory.LazyAttribute(lambda obj: f"{obj.username}@hello.py")
-    password = "hello_guys"
+    password = "hello"
 
 
 class CustomerFactory(factory.django.DjangoModelFactory):
