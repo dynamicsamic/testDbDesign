@@ -13,7 +13,7 @@ def customer_middleware(get_response):
         if qs := Customer.objects.filter(user_id=user.id):
             customer = qs[0]
         request.customer = customer
-        print(f"new middleware works: {request.customer}")
+        print(f"new middleware works: {user}")
         response = get_response(request)
 
         return response

@@ -2,9 +2,12 @@ import random
 
 import factory
 from dbexample import models
+from django.contrib.auth import get_user_model
 from faker import Faker
 
 fake = Faker()
+User = get_user_model()
+
 
 ATTRIBUTE_NUM = 7
 USER_NUM = CATEGORY_NUM = VENDOR_NUM = PRODUCT_SET_NUM = 10
@@ -62,7 +65,7 @@ def set_random_attrs(obj):
 
 class UserFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = models.User
+        model = User
 
     username = factory.Sequence(lambda i: f"user{i}")
     email = factory.LazyAttribute(lambda obj: f"{obj.username}@hello.py")
@@ -73,7 +76,7 @@ class CustomerFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.Customer
 
-    user = factory.Iterator(models.User.objects.all())
+    user = factory.Iterator(User.objects.all())
     status = factory.Sequence(
         lambda _: random.choice(models.Customer.CustomerStatus.values)
     )

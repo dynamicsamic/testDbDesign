@@ -3,6 +3,7 @@ from decimal import Decimal
 from typing import Any, Mapping
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -153,7 +154,7 @@ class Customer(ProxyUserRole):
         ARCHIVED = "archived"
 
     user = models.OneToOneField(
-        settings.AUTH_USER_MODEL,
+        get_user_model(),
         related_name="customer",
         on_delete=models.CASCADE,
     )
