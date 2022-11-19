@@ -33,7 +33,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "dbexample",
+    "dbexample.apps.DbexampleConfig",
     "demo",
 ]
 
@@ -47,6 +47,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "dbexample.middleware.customer_middleware",
 ]
+
 
 ROOT_URLCONF = "dbDesign.urls"
 

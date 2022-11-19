@@ -5,7 +5,7 @@ from . import views
 app_name = "dbexample"
 
 urlpatterns = [
-    path("", views.foo, name="foo"),
+    path("foo/", views.foo, name="foo"),
     path(
         "signup/",
         views.customer_registration_view,

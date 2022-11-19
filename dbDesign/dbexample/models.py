@@ -128,14 +128,8 @@ class ProxyUserRole(models.Model):
         return self.username
 
 
-class BaseUser(AbstractUser):
+class User(AbstractUser):
     email = models.EmailField(_("email adress"), unique=True)
-
-    class Meta:
-        abstract = True
-
-
-class User(BaseUser):
     is_active = models.BooleanField(
         _("active"),
         default=False,
