@@ -53,6 +53,8 @@ ROOT_URLCONF = "dbDesign.urls"
 
 AUTH_USER_MODEL = "dbexample.User"
 
+CART_SESSION_ID = "cart"
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
