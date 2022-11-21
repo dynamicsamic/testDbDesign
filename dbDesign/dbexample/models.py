@@ -425,6 +425,7 @@ class ProductItemManager(models.Manager):
             p_name = p_set.name
         kwargs.update({"product_name": p_name})
         product_item = super().create(**kwargs)
+        product_item.set_sku()
         # CREATE STOCK INSTANCE ALONG WITH PRODUCT ITEM
         # MANUALLY IN FORMS OR SERIALIZERS
         # stock_qty = kwargs.get("quantity", 0)
@@ -463,6 +464,8 @@ class ProductItem(models.Model):
         _("stock keeping unit"),
         max_length=20,
         help_text="required, max_len: 20",
+        blank=True,
+        null=True,
     )
     attrs = models.JSONField(
         _("Attributes for product item "),
@@ -528,6 +531,15 @@ class ProductItem(models.Model):
     def views(self) -> int:
         return self._view_count
 
+    def _generate_sku(self):
+        """Generate sku from product type and product item `ids` and current date."""
+        return f"{self.product_set.p_type_id:>03}{self.pk:>02}{dt.datetime.now():%Y%m}"
+
+    def set_sku(self):
+        """Set sku and save the model."""
+        self.sku = self._generate_sku()
+        self.save(update_fields=("sku",))
+
     # @property
     # def price(self) -> Decimal:
     #    return self._price
@@ -555,9 +567,9 @@ class ProductItem(models.Model):
         return {
             "product_name": self.product_name,
             "sku": self.sku,
-            "regular_price": self.regular_price.to_eng_string(),
+            "regular_price": self.regular_price,
             "discount": self.discount,
-            "discounted_price": self.discounted_price.to_eng_string(),
+            "discounted_price": self.discounted_price,
         }
 
 
@@ -657,317 +669,316 @@ class Stock(models.Model):
         return f"Product({self.product_id}): {self.amount}"
 
 
-class Cart:
-    def __init__(self, request: HttpRequest) -> None:
-        """Get or create a Cart from request."""
-
-        self.session = request.session
-        cart = self.session.get(settings.CART_SESSION_ID)
-        if not cart:
-            cart = self.session[settings.CART_SESSION_ID] = {}
-        self.cart = cart
-
-    def add(
-        self,
-        product: ProductItem,
-        quantity: int = 1,
-        set_quantity: bool = False,
-    ):
-        """Add a product to the cart."""
-
-        product_id = str(product.id)  # maybe leave this a int?
-        if product_id not in self.cart:
-            self.cart[product_id] = {
-                "product": product,
-                "quantity": quantity,
-                "price": product.discounted_price.to_eng_string(),
-            }
-        if set_quantity:
-            self.cart[product_id]["quantity"] = quantity
-        else:
-            self.cart[product_id]["quantity"] += quantity
-        self.save()
-
-    def save(self) -> None:
-        """Mark session as modified."""
-
-        self.session.modified = True
-
-    def remove(self, product: ProductItem) -> None:
-        """Remove a product from the cart."""
-
-        product_id = str(product.id)
-        if product_id in self.cart:
-            del self.cart[product_id]
-            self.save()
-
-
+# class Cart:
+#    def __init__(self, request: HttpRequest) -> None:
+#        """Get or create a Cart from request."""
 #
-# class Cart(models.Model):
-#    # maybe try: Cart.objects.select_related('customer)?
-#    class CartStatus(models.TextChoices):
-#        EMPTY = "empty"
-#        IN_PROGRESS = "in_progress"
+#        self.session = request.session
+#        cart = self.session.get(settings.CART_SESSION_ID)
+#        if not cart:
+#            cart = self.session[settings.CART_SESSION_ID] = {}
+#        self.cart = cart
 #
-#    customer = models.OneToOneField(
-#        Customer,
-#        related_name="cart",
-#        on_delete=models.PROTECT,
-#        verbose_name=_("Cutomer"),
-#        help_text="required, customer instance",
-#    )
-#    status = models.CharField(
-#        _("Cart status"),
-#        max_length=20,
-#        choices=CartStatus.choices,
-#        default=CartStatus.EMPTY,
-#        help_text=_("required, default: empty"),
-#    )
-#    created_at = models.DateTimeField(
-#        _("cart creation time"),
-#        auto_now_add=True,
-#        help_text=_("format: Y-m-d H:M:S"),
-#    )
-#    updated_at = models.DateTimeField(
-#        _("cart last update time"),
-#        auto_now=True,
-#        help_text=_("format: Y-m-d H:M:S"),
-#    )
-#
-#    def clear_out(self):
-#        """Clean the cart."""
-#        self.items.all().delete()
-#        self.status = self.CartStatus.EMPTY
-#        self.save(update_fields=("status",))
-#
-#    def get_initial_sum(self) -> Decimal:
-#        """Get sum of all items in cart before discount applied."""
-#        if res := self.items.aggregate(initial=Sum("regular_price")).get(
-#            "initial"
-#        ):
-#            return res
-#        return Decimal("0.00")
-#        # return round(
-#        #    *CartItem.objects.filter(cart_id=self.id)
-#        #    .aggregate(Sum("regular_price"))
-#        #    .values(),
-#        #    2,
-#        # )
-#
-#    def get_total_sum(self) -> Decimal:
-#        """Get sum of all items in cart after dicsount added."""
-#        if res := self.items.aggregate(total=Sum("discounted_price")).get(
-#            "total"
-#        ):
-#            return res
-#        return Decimal("0.00")
-#        # return round(
-#        #    *CartItem.objects.filter(cart_id=self.id)
-#        #    .aggregate(Sum("discounted_price"))
-#        #    .values(),
-#        #    2,
-#        # )
-#
-#    def get_total_discount(self) -> Decimal:
-#        """Get sum of total cart discount."""
-#        if res := self.items.aggregate(
-#            discount=Sum("regular_price") - Sum("discounted_price")
-#        ).get("discount"):
-#            return res
-#        return Decimal("0.00")
-#
-#    def __str__(self) -> str:
-#        return str(self.customer_id)
-#
-#
-# class CartItemManager(models.Manager):
-#    def create(self, **kwargs: Mapping[str, Any]):
-#        """Check if a product item is already in the cart.
-#        If it's there - increase the quantity.
-#        If it's not - create a new cart item.
-#        """
-#        cart = kwargs.get("cart")
-#        product = kwargs.get("product")
-#        quantity = kwargs.get("quantity", 1)
-#        try:
-#            cart_item = self.model.objects.get(cart=cart, product=product)
-#            cart_item.add_quantity(quantity)
-#        except self.model.DoesNotExist:
-#            cart_item = super().create(**kwargs)
-#        except Exception as e:
-#            print(f"An unexpected error occured: {e}")
-#            return
-#        if cart.status == Cart.CartStatus.EMPTY:
-#            cart.status = Cart.CartStatus.IN_PROGRESS
-#            cart.save(update_fields=("status",))
-#        return cart_item
-#
-#    #   if product := kwargs.get("product"):
-#    #       kwargs.update(
-#    #           {
-#    #               "product_name": product.product_name,
-#    #               "price": product.discounted_price,
-#    #           }
-#    #       )
-#
-#
-# class CartItem(models.Model):
-#    cart = models.ForeignKey(
-#        Cart,
-#        related_name="items",
-#        on_delete=models.CASCADE,
-#        verbose_name="Item in cart",
-#    )
-#    product = models.ForeignKey(
-#        ProductItem,
-#        related_name="in_cart",
-#        on_delete=models.PROTECT,
-#        verbose_name=_("Product item"),
-#    )
-#    product_name = models.CharField(
-#        _("Product name"),
-#        max_length=150,
-#        help_text=_("optional, max_len: 150"),
-#        blank=True,
-#        null=True,
-#    )
-#    sku = models.CharField(
-#        _("stock keeping unit"),
-#        max_length=20,
-#        help_text="optional, max_len: 20",
-#        blank=True,
-#        null=True,
-#    )
-#    quantity = models.PositiveIntegerField(
-#        _("Product quantity"),
-#        validators=[MinValueValidator(1)],
-#        help_text=_("reqiured, positive integer"),
-#        default=1,
-#    )
-#    regular_price = models.DecimalField(
-#        _("Product item price"),
-#        max_digits=9,
-#        decimal_places=2,
-#        help_text=_("optional, max_price: 9_999_999.99"),
-#        blank=True,
-#        null=True,
-#    )
-#    discount = models.PositiveSmallIntegerField(
-#        _("Discount rate (integer)"),
-#        default=0,
-#        help_text=_("optional, default: 0"),
-#        validators=[MaxValueValidator(99)],
-#        blank=True,
-#        null=True,
-#    )
-#    discounted_price = models.DecimalField(
-#        _("Discounted cart item price"),
-#        max_digits=9,
-#        decimal_places=2,
-#        help_text=_("optional, max_price: 9_999_999.99"),
-#        blank=True,
-#        null=True,
-#    )
-#    # is_active ??
-#    marked_for_order = models.BooleanField(
-#        _("Item selected to be ordered"),
-#        default=False,
-#        help_text=_("required, default: False"),
-#    )
-#    created_at = models.DateTimeField(
-#        _("cart_item creation time"),
-#        auto_now_add=True,
-#        help_text=_("format: Y-m-d H:M:S"),
-#    )
-#    updated_at = models.DateTimeField(
-#        _("cart_item last update time"),
-#        auto_now=True,
-#        help_text=_("format: Y-m-d H:M:S"),
-#    )
-#    objects = CartItemManager()
-#
-#    def save(self, *args, **kwargs) -> None:
-#        """Update cart info each time a cart item updated."""
-#        super().save(*args, **kwargs)
-#        self.cart.save(update_fields=("updated_at",))
-#
-#    @classmethod
-#    def from_product_item(
-#        cls, customer_id: int, product_item_id: int, **kwargs: dict
+#    def add(
+#        self,
+#        product: ProductItem,
+#        quantity: int = 1,
+#        set_quantity: bool = False,
 #    ):
-#        """Create CartItem from ProductItem.
-#        Prevent creating cart items from inactive products
-#        and products that don't have enough stock items.
-#        Fetch stock data along with the product item
-#        to prevent additional db queries.
-#        """
-#        try:
-#            cart = Cart.objects.get(customer_id=customer_id)
-#            product_item = ProductItem.objects.select_related("stock").get(
-#                id=product_item_id
-#            )
-#        except (Cart.DoesNotExist, ProductItem.DoesNotExist) as e:
-#            print(e)
-#            raise
-#        if not product_item.is_active:
-#            raise ValidationError(
-#                _("Inactive products can't be added to cart")
-#            )
-#        if not product_item.stock.available(kwargs.get("quantity", 1)):
-#            raise ValidationError(_("Not enough product in stock"))
-#            # maybe need to deduct from stock to reserve items for order
-#            # but then need to keep notice of cleansing the cart periodically
-#        product_data = product_item.to_dict()
-#        kwargs.update(product_data)
-#        cart_item = cls.objects.create(
-#            cart=cart, product=product_item, **kwargs
-#        )
-#        return cart_item
+#        """Add a product to the cart."""
 #
-#    def to_dict(self) -> dict:
-#        return {
-#            # "cart": self.cart,
-#            "product": self.product,
-#            "product_name": self.product_name,
-#            "sku": self.sku,
-#            "quantity": self.quantity,
-#            # "regular_price": self.regular_price,
-#            # "discount": self.discount,
-#            "price": self.discounted_price,
-#            "sum": self.get_final_sum()
-#            # "marked_for_order": self.marked_for_order,
-#        }
+#        product_id = str(product.id)  # maybe leave this a int?
+#        if product_id not in self.cart:
+#            self.cart[product_id] = {
+#                "product": product,
+#                "quantity": quantity,
+#                "price": product.discounted_price.to_eng_string(),
+#            }
+#        if set_quantity:
+#            self.cart[product_id]["quantity"] = quantity
+#        else:
+#            self.cart[product_id]["quantity"] += quantity
+#        self.save()
 #
-#    def add_quantity(self, quantity: int) -> None:
-#        self.quantity += quantity
-#        self.save(update_fields=("quantity",))
+#    def save(self) -> None:
+#        """Mark session as modified."""
 #
-#    @decimalize()
-#    def get_final_sum(self) -> Decimal:
-#        return self.discounted_price * self.quantity
+#        self.session.modified = True
 #
-#    def mark_for_order(self) -> None:
-#        self.marked_for_order = True
-#        self.save(update_fields=("marked_for_order",))
+#    def remove(self, product: ProductItem) -> None:
+#        """Remove a product from the cart."""
 #
-#    def unmark_for_order(self) -> None:
-#        self.marked_for_order = False
-#        self.save(update_fields=("marked_for_order",))
-#
-#    # view behavior:
-#    # def add_cart_item(request, prod_id, cart_id, quantity=1):
-#    #   from django.utils.timezone import now
-#    #   try:
-#    #       cart_item, created = CartItem.objects.get_or_create(cart_id=cart_id, product_id=product_id)
-#    #       if created:
-#    #         cart_item.add_quantity(quantity)
-#    #         cart_item.updated_at = now()
-#    #   except IntegrityError as e:
-#    #       print('product_item or cart doesn\'t exist')
-#    #       return
-#    #   Cart.objects.filter(id=cart_id).update(created_at=now())
-#    #
-#    # or maybe need to fetch the product: ProductItem.objects.select_related('cart').get(id=prod_id)
+#        product_id = str(product.id)
+#        if product_id in self.cart:
+#            del self.cart[product_id]
+#            self.save()
+
+
+class Cart(models.Model):
+    # maybe try: Cart.objects.select_related('customer)?
+    class CartStatus(models.TextChoices):
+        EMPTY = "empty"
+        IN_PROGRESS = "in_progress"
+
+    customer = models.OneToOneField(
+        Customer,
+        related_name="cart",
+        on_delete=models.PROTECT,
+        verbose_name=_("Cutomer"),
+        help_text="required, customer instance",
+    )
+    status = models.CharField(
+        _("Cart status"),
+        max_length=20,
+        choices=CartStatus.choices,
+        default=CartStatus.EMPTY,
+        help_text=_("required, default: empty"),
+    )
+    created_at = models.DateTimeField(
+        _("cart creation time"),
+        auto_now_add=True,
+        help_text=_("format: Y-m-d H:M:S"),
+    )
+    updated_at = models.DateTimeField(
+        _("cart last update time"),
+        auto_now=True,
+        help_text=_("format: Y-m-d H:M:S"),
+    )
+
+    @property
+    def empty(self):
+        return not self.items.exists()
+
+    def clear_out(self):
+        """Clean the cart."""
+        self.items.all().delete()
+        self.status = self.CartStatus.EMPTY
+        self.save(update_fields=("status",))
+
+    def get_initial_sum(self) -> Decimal:
+        """Get sum of all items in cart before discount applied."""
+        if res := self.items.aggregate(initial=Sum("regular_price")).get(
+            "initial"
+        ):
+            return res
+        return Decimal("0.00")
+        # return round(
+        #    *CartItem.objects.filter(cart_id=self.id)
+        #    .aggregate(Sum("regular_price"))
+        #    .values(),
+        #    2,
+        # )
+
+    def get_total_sum(self) -> Decimal:
+        """Get sum of all items in cart after dicsount added."""
+        if res := self.items.aggregate(total=Sum("discounted_price")).get(
+            "total"
+        ):
+            return res
+        return Decimal("0.00")
+        # return round(
+        #    *CartItem.objects.filter(cart_id=self.id)
+        #    .aggregate(Sum("discounted_price"))
+        #    .values(),
+        #    2,
+        # )
+
+    def get_total_discount(self) -> Decimal:
+        """Get sum of total cart discount."""
+        if res := self.items.aggregate(
+            discount=Sum("regular_price") - Sum("discounted_price")
+        ).get("discount"):
+            return res
+        return Decimal("0.00")
+
+    def __str__(self) -> str:
+        return str(self.customer_id)
+
+
+class CartItemManager(models.Manager):
+    def create(self, **kwargs: Mapping[str, Any]):
+        """Check if a product item is already in the cart.
+        If it's there - increase the quantity.
+        If it's not - create a new cart item.
+        """
+        cart = kwargs.get("cart")
+        product = kwargs.get("product")
+        quantity = kwargs.get("quantity", 1)
+        override_quantity = kwargs.get("override_quantity", False)
+        try:
+            cart_item = self.model.objects.get(cart=cart, product=product)
+            cart_item.add_quantity(quantity, override_quantity)
+        except self.model.DoesNotExist:
+            cart_item = super().create(**kwargs)
+        except Exception as e:
+            print(f"An unexpected error occured: {e}")
+            return
+        if cart.status == Cart.CartStatus.EMPTY:
+            cart.status = Cart.CartStatus.IN_PROGRESS
+            cart.save(update_fields=("status",))
+        return cart_item
+
+    #   if product := kwargs.get("product"):
+    #       kwargs.update(
+    #           {
+    #               "product_name": product.product_name,
+    #               "price": product.discounted_price,
+    #           }
+    #       )
+
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(
+        Cart,
+        related_name="items",
+        on_delete=models.CASCADE,
+        verbose_name="Item in cart",
+    )
+    product = models.ForeignKey(
+        ProductItem,
+        related_name="in_cart",
+        on_delete=models.PROTECT,
+        verbose_name=_("Product item"),
+    )
+    product_name = models.CharField(
+        _("Product name"),
+        max_length=150,
+        help_text=_("optional, max_len: 150"),
+        blank=True,
+        null=True,
+    )
+    sku = models.CharField(
+        _("stock keeping unit"),
+        max_length=20,
+        help_text="optional, max_len: 20",
+    )
+    quantity = models.PositiveIntegerField(
+        _("Product quantity"),
+        validators=[MinValueValidator(1)],
+        help_text=_("reqiured, positive integer"),
+        default=1,
+    )
+    regular_price = models.DecimalField(
+        _("Product item price"),
+        max_digits=9,
+        decimal_places=2,
+        help_text=_("optional, max_price: 9_999_999.99"),
+    )
+    discount = models.PositiveSmallIntegerField(
+        _("Discount rate (integer)"),
+        default=0,
+        help_text=_("optional, default: 0"),
+        validators=[MaxValueValidator(99)],
+    )
+    discounted_price = models.DecimalField(
+        _("Discounted cart item price"),
+        max_digits=9,
+        decimal_places=2,
+        help_text=_("optional, max_price: 9_999_999.99"),
+    )
+    # is_active ??
+    marked_for_order = models.BooleanField(
+        _("Item selected to be ordered"),
+        default=True,
+        help_text=_("required, default: False"),
+    )
+    created_at = models.DateTimeField(
+        _("cart_item creation time"),
+        auto_now_add=True,
+        help_text=_("format: Y-m-d H:M:S"),
+    )
+    updated_at = models.DateTimeField(
+        _("cart_item last update time"),
+        auto_now=True,
+        help_text=_("format: Y-m-d H:M:S"),
+    )
+    objects = CartItemManager()
+
+    def save(self, *args, **kwargs) -> None:
+        """Update cart info each time a cart item updated."""
+        super().save(*args, **kwargs)
+        self.cart.save(update_fields=("updated_at",))
+
+    @classmethod
+    def from_product_item(
+        cls, customer_id: int, product_item_id: int, **kwargs: dict
+    ):
+        """Create CartItem from ProductItem.
+        Prevent creating cart items from inactive products
+        and products that don't have enough stock items.
+        Fetch stock data along with the product item
+        to prevent additional db queries.
+        """
+        try:
+            cart = Cart.objects.get(customer_id=customer_id)
+            product_item = ProductItem.objects.select_related("stock").get(
+                id=product_item_id
+            )
+        except (Cart.DoesNotExist, ProductItem.DoesNotExist) as e:
+            print(e)
+            raise
+        if not product_item.is_active:
+            raise ValidationError(
+                _("Inactive products can't be added to cart")
+            )
+        if not product_item.stock.available(kwargs.get("quantity", 1)):
+            raise ValidationError(_("Not enough product in stock"))
+            # maybe need to deduct from stock to reserve items for order
+            # but then need to keep notice of cleansing the cart periodically
+        product_data = product_item.to_dict()
+        kwargs.update(product_data)
+        cart_item = cls.objects.create(
+            cart=cart, product=product_item, **kwargs
+        )
+        return cart_item
+
+    def to_dict(self) -> dict:
+        return {
+            # "cart": self.cart,
+            "product": self.product,
+            "product_name": self.product_name,
+            "sku": self.sku,
+            "quantity": self.quantity,
+            # "regular_price": self.regular_price,
+            # "discount": self.discount,
+            "price": self.discounted_price,
+            "sum": self.get_sum()
+            # "marked_for_order": self.marked_for_order,
+        }
+
+    def add_quantity(self, quantity: int, override: bool = False) -> None:
+        if override:
+            self.quantity = quantity
+        else:
+            self.quantity += quantity
+        self.save(update_fields=("quantity",))
+
+    @decimalize()
+    def get_sum(self) -> Decimal:
+        return self.discounted_price * self.quantity
+
+    def mark_for_order(self) -> None:
+        self.marked_for_order = True
+        self.save(update_fields=("marked_for_order",))
+
+    def unmark_for_order(self) -> None:
+        self.marked_for_order = False
+        self.save(update_fields=("marked_for_order",))
+
+    # view behavior:
+    # def add_cart_item(request, prod_id, cart_id, quantity=1):
+    #   from django.utils.timezone import now
+    #   try:
+    #       cart_item, created = CartItem.objects.get_or_create(cart_id=cart_id, product_id=product_id)
+    #       if created:
+    #         cart_item.add_quantity(quantity)
+    #         cart_item.updated_at = now()
+    #   except IntegrityError as e:
+    #       print('product_item or cart doesn\'t exist')
+    #       return
+    #   Cart.objects.filter(id=cart_id).update(created_at=now())
+    #
+    # or maybe need to fetch the product: ProductItem.objects.select_related('cart').get(id=prod_id)
 
 
 class Order(models.Model):

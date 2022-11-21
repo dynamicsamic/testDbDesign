@@ -25,7 +25,6 @@ class ViewTestCase(TestCase):
         response = self.unauthorized_client.post(
             path=reverse("dbexample:customer_registration"), data=valid_data
         )
-        print(type(response.context))
         self.assertEqual(response.status_code, HTTPStatus.CREATED)
         self.assertEqual(User.objects.count(), user_count + 1)
         self.assertEqual(models.Customer.objects.count(), customer_count + 1)
@@ -40,4 +39,4 @@ class ViewTestCase(TestCase):
             (valid_data["email"], customer.email),
             (valid_data["email"], user.email),
         )
-        # self.assertEqual(customer.email, customer.user.email)
+        self.assertTrue(user.check_password(valid_data["password1"]))

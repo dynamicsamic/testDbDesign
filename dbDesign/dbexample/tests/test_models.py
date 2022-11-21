@@ -1,3 +1,4 @@
+import random
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
@@ -214,6 +215,10 @@ class ProdSetProdItemStockModelsTestCase(DataFactoryMixin, TestCase):
             self.p_item._meta.model.objects, models.ProductItemManager
         )
 
+    def test_prod_item_has_auto_generated_sku_field(self):
+        self.assertTrue(self.p_item.sku)
+        self.assertEqual(self.p_item.sku, self.p_item._generate_sku())
+
     def test_prod_item_setting_views_raises_error(self):
         with self.assertRaises(AttributeError):
             self.p_item.views = 20
@@ -292,3 +297,46 @@ class ProdSetProdItemStockModelsTestCase(DataFactoryMixin, TestCase):
             self.stock.deduct(-1)
             self.stock.add(-1)
             self.stock.set(-1)
+
+
+class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
+    def setUp(self):
+        self.customer = self.customers[0]
+        self.cart = models.Cart.objects.create(customer=self.customer)
+
+    def test_empty_cart_attributes(self):
+        self.assertEqual(self.cart.status, models.Cart.CartStatus.EMPTY)
+        self.assertTrue(self.cart.empty)
+
+    def test_add_inactive_prod_item_to_cart_fails(self):
+        if p_item := models.ProductItem.objects.filter(
+            is_active=False
+        ).first():
+            with self.assertRaises(ValidationError):
+                models.CartItem.from_product_item(self.customer.id, p_item.id)
+
+    def test_add_prod_item_quantity_more_than_stock_available_fails(self):
+        if p_item := models.ProductItem.objects.filter(is_active=True).first():
+            available = p_item.stock.amount
+            with self.assertRaises(ValidationError):
+                models.CartItem.from_product_item(
+                    self.customer.id, p_item.id, quantity=available + 1
+                )
+
+    def test_add_prod_item_valid_quantity_success(self):
+        if p_item := models.ProductItem.objects.filter(is_active=True).first():
+            available = p_item.stock.amount
+            cart_item = models.CartItem.from_product_item(
+                self.customer.id,
+                p_item.id,
+                quantity=random.randint(1, available),
+            )
+            self.assertFalse(self.cart.empty)
+            self.assertEqual(self.cart.items.count(), 1)
+            self.assertNotEqual(self.cart.created_at, self.cart.updated_at)
+            self.assertLessEqual(cart_item.quantity, p_item.stock.amount)
+            self.assertEqual(cart_item.sku, p_item.sku)
+            self.assertEqual(cart_item.product_name, p_item.product_name)
+            self.assertEqual(
+                cart_item.discounted_price, p_item.discounted_price
+            )

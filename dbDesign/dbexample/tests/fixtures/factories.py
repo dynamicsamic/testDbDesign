@@ -172,7 +172,7 @@ class ProductItemFactory(factory.django.DjangoModelFactory):
 
     product_set = factory.Iterator(models.ProductSet.objects.all())
     product_name = factory.Sequence(lambda i: f"product_item{i}")
-    sku = factory.Sequence(lambda i: f"110_{i}")
+    # sku = factory.Sequence(lambda i: f"110_{i}")
     attrs = factory.LazyAttribute(set_random_attrs)
     regular_price = factory.Sequence(
         lambda _: fake.pydecimal(
