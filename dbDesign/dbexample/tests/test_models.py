@@ -340,3 +340,14 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             self.assertEqual(
                 cart_item.discounted_price, p_item.discounted_price
             )
+
+    def test_cart_get_initial_sum_returns_expected_result(self):
+        if p_item := models.ProductItem.objects.filter(is_active=True).first():
+            available = p_item.stock.amount
+            cart_item = models.CartItem.from_product_item(
+                self.customer.id,
+                p_item.id,
+                quantity=random.randint(1, available),
+            )
+            print(cart_item.quantity * cart_item.regular_price)
+            print(self.cart.get_initial_sum())

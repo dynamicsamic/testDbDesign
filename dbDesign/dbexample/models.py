@@ -8,7 +8,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import Sum
+from django.db.models import F, Sum
 from django.db.models.query import QuerySet
 from django.http.request import HttpRequest
 from django.utils.text import slugify
@@ -755,12 +755,14 @@ class Cart(models.Model):
         self.status = self.CartStatus.EMPTY
         self.save(update_fields=("status",))
 
+    @decimalize()
     def get_initial_sum(self) -> Decimal:
         """Get sum of all items in cart before discount applied."""
-        if res := self.items.aggregate(initial=Sum("regular_price")).get(
-            "initial"
-        ):
+        if res := self.items.aggregate(
+            initial=Sum(F("regular_price") * F("quantity"))
+        ).get("initial"):
             return res
+        # return sum(i.regular_price * i.quantity for i in self.items.all())
         return Decimal("0.00")
         # return round(
         #    *CartItem.objects.filter(cart_id=self.id)
@@ -939,11 +941,11 @@ class CartItem(models.Model):
             "product_name": self.product_name,
             "sku": self.sku,
             "quantity": self.quantity,
-            # "regular_price": self.regular_price,
-            # "discount": self.discount,
+            "regular_price": self.regular_price,
+            "discount": self.discount,
             "price": self.discounted_price,
-            "sum": self.get_sum()
-            # "marked_for_order": self.marked_for_order,
+            "sum": self.get_sum(),
+            "marked_for_order": self.marked_for_order,
         }
 
     def add_quantity(self, quantity: int, override: bool = False) -> None:
