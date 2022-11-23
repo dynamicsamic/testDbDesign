@@ -313,20 +313,22 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             is_active=False
         ).first():
             with self.assertRaises(ValidationError):
-                models.CartItem.from_product_item(self.customer.id, p_item.id)
+                models.CartItem.create_from_product_item(
+                    self.customer.id, p_item.id
+                )
 
     def test_add_prod_item_quantity_more_than_stock_available_fails(self):
         if p_item := models.ProductItem.objects.filter(is_active=True).first():
             available = p_item.stock.amount
             with self.assertRaises(ValidationError):
-                models.CartItem.from_product_item(
+                models.CartItem.create_from_product_item(
                     self.customer.id, p_item.id, quantity=available + 1
                 )
 
     def test_add_prod_item_valid_quantity_success(self):
         if p_item := models.ProductItem.objects.filter(is_active=True).first():
             available = p_item.stock.amount
-            cart_item = models.CartItem.from_product_item(
+            cart_item = models.CartItem.create_from_product_item(
                 self.customer.id,
                 p_item.id,
                 quantity=random.randint(1, available),
@@ -341,13 +343,88 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
                 cart_item.discounted_price, p_item.discounted_price
             )
 
+    def test_cart_item_adding_the_same_product_item_increases_quantity(self):
+        FIRST_ADDED_QUANTITY = 2
+        NEXT_ADDED_QUANTITY = 5
+        if p_item := models.ProductItem.objects.filter(is_active=True).first():
+            p_item.stock.add(10)
+            cart_item = models.CartItem.create_from_product_item(
+                self.customer.id,
+                p_item.id,
+                quantity=FIRST_ADDED_QUANTITY,
+            )
+            self.assertEqual(self.cart.items.count(), 1)
+            self.assertEqual(cart_item.quantity, FIRST_ADDED_QUANTITY)
+            cart_item2 = models.CartItem.create_from_product_item(
+                self.customer.id,
+                p_item.id,
+                quantity=NEXT_ADDED_QUANTITY,
+            )
+            self.assertEqual(self.cart.items.count(), 1)
+            self.assertEqual(
+                cart_item2.quantity, FIRST_ADDED_QUANTITY + NEXT_ADDED_QUANTITY
+            )
+            self.assertEqual(cart_item.id, cart_item2.id)
+
     def test_cart_get_initial_sum_returns_expected_result(self):
         if p_item := models.ProductItem.objects.filter(is_active=True).first():
             available = p_item.stock.amount
-            cart_item = models.CartItem.from_product_item(
+            models.CartItem.create_from_product_item(
                 self.customer.id,
                 p_item.id,
                 quantity=random.randint(1, available),
             )
-            print(cart_item.quantity * cart_item.regular_price)
-            print(self.cart.get_initial_sum())
+            expected = sum(
+                item.regular_price * item.quantity
+                for item in self.cart.items.all()
+            )
+            self.assertEqual(self.cart.get_initial_sum(), expected)
+
+    def test_cart_get_discounted_sum_returns_expected_result(self):
+        if p_item := models.ProductItem.objects.filter(is_active=True).first():
+            available = p_item.stock.amount
+            models.CartItem.create_from_product_item(
+                self.customer.id,
+                p_item.id,
+                quantity=random.randint(1, available),
+            )
+            expected = sum(
+                item.discounted_price * item.quantity
+                for item in self.cart.items.all()
+            )
+            self.assertEqual(self.cart.get_discounted_sum(), expected)
+
+    def test_cart_get_total_discount_returns_expected_result(self):
+        if p_item := models.ProductItem.objects.filter(is_active=True).first():
+            available = p_item.stock.amount
+            models.CartItem.create_from_product_item(
+                self.customer.id,
+                p_item.id,
+                quantity=random.randint(1, available),
+            )
+            expected = sum(
+                (item.regular_price - item.discounted_price) * item.quantity
+                for item in self.cart.items.all()
+            )
+            self.assertEqual(self.cart.get_total_discount(), expected)
+
+    def test_cart_clear_out_deletes_all_items_and_sets_empty_status(self):
+        if p_item := models.ProductItem.objects.filter(is_active=True).first():
+            available = p_item.stock.amount
+            models.CartItem.create_from_product_item(
+                self.customer.id,
+                p_item.id,
+                quantity=random.randint(1, available),
+            )
+            self.assertFalse(self.cart.empty)
+            self.cart.clear_out()
+            self.assertTrue(self.cart.empty)
+            self.assertEqual(self.cart.status, models.Cart.CartStatus.EMPTY)
+
+
+# from dbexample.models import *
+#
+# c = Cart.objects.first()
+# c2 = Cart.objects.last()
+# from django.db import connection, reset_queries
+#

@@ -753,48 +753,43 @@ class Cart(models.Model):
         """Clean the cart."""
         self.items.all().delete()
         self.status = self.CartStatus.EMPTY
-        self.save(update_fields=("status",))
+        self.save(update_fields=("status", "updated_at"))
 
     @decimalize()
     def get_initial_sum(self) -> Decimal:
         """Get sum of all items in cart before discount applied."""
-        if res := self.items.aggregate(
-            initial=Sum(F("regular_price") * F("quantity"))
-        ).get("initial"):
-            return res
-        # return sum(i.regular_price * i.quantity for i in self.items.all())
-        return Decimal("0.00")
-        # return round(
-        #    *CartItem.objects.filter(cart_id=self.id)
-        #    .aggregate(Sum("regular_price"))
-        #    .values(),
-        #    2,
-        # )
+        return (
+            self.items.aggregate(
+                initial=Sum(F("regular_price") * F("quantity"))
+            ).get("initial")
+            or 0
+        )
 
-    def get_total_sum(self) -> Decimal:
+    @decimalize()
+    def get_discounted_sum(self) -> Decimal:
         """Get sum of all items in cart after dicsount added."""
-        if res := self.items.aggregate(total=Sum("discounted_price")).get(
-            "total"
-        ):
-            return res
-        return Decimal("0.00")
-        # return round(
-        #    *CartItem.objects.filter(cart_id=self.id)
-        #    .aggregate(Sum("discounted_price"))
-        #    .values(),
-        #    2,
-        # )
+        return (
+            self.items.aggregate(
+                discounted=Sum(F("discounted_price") * F("quantity"))
+            ).get("discounted")
+            or 0
+        )
 
+    @decimalize()
     def get_total_discount(self) -> Decimal:
         """Get sum of total cart discount."""
-        if res := self.items.aggregate(
-            discount=Sum("regular_price") - Sum("discounted_price")
-        ).get("discount"):
-            return res
-        return Decimal("0.00")
+        return (
+            self.items.aggregate(
+                discount=Sum(
+                    (F("regular_price") - F("discounted_price"))
+                    * F("quantity")
+                )
+            ).get("discount")
+            or 0
+        )
 
     def __str__(self) -> str:
-        return str(self.customer_id)
+        return f"{self.id} for Customer({self.customer_id})"
 
 
 class CartItemManager(models.Manager):
@@ -902,7 +897,7 @@ class CartItem(models.Model):
         self.cart.save(update_fields=("updated_at",))
 
     @classmethod
-    def from_product_item(
+    def create_from_product_item(
         cls, customer_id: int, product_item_id: int, **kwargs: dict
     ):
         """Create CartItem from ProductItem.
@@ -932,6 +927,7 @@ class CartItem(models.Model):
         cart_item = cls.objects.create(
             cart=cart, product=product_item, **kwargs
         )
+        cart.save(update_fields=("updated_at",))
         return cart_item
 
     def to_dict(self) -> dict:
