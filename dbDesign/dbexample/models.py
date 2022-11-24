@@ -749,19 +749,28 @@ class Cart(models.Model):
     def empty(self):
         return not self.items.exists()
 
+    @property
+    def items_marked_for_order(self):
+        return self.items.filter(marked_for_order=True)
+
     def clear_out(self):
         """Clean the cart."""
         self.items.all().delete()
         self.status = self.CartStatus.EMPTY
         self.save(update_fields=("status", "updated_at"))
 
+    def refresh(self) -> None:
+        # think about save() method runs at every item refresh
+        for item in self.items.all():
+            item.refresh_from_product_item()
+
     @decimalize()
     def get_initial_sum(self) -> Decimal:
         """Get sum of all items in cart before discount applied."""
         return (
-            self.items.aggregate(
-                initial=Sum(F("regular_price") * F("quantity"))
-            ).get("initial")
+            self.items.filter(marked_for_order=True)
+            .aggregate(initial=Sum(F("regular_price") * F("quantity")))
+            .get("initial")
             or 0
         )
 
@@ -769,9 +778,9 @@ class Cart(models.Model):
     def get_discounted_sum(self) -> Decimal:
         """Get sum of all items in cart after dicsount added."""
         return (
-            self.items.aggregate(
-                discounted=Sum(F("discounted_price") * F("quantity"))
-            ).get("discounted")
+            self.items.filter(marked_for_order=True)
+            .aggregate(discounted=Sum(F("discounted_price") * F("quantity")))
+            .get("discounted")
             or 0
         )
 
@@ -779,12 +788,14 @@ class Cart(models.Model):
     def get_total_discount(self) -> Decimal:
         """Get sum of total cart discount."""
         return (
-            self.items.aggregate(
+            self.items.filter(marked_for_order=True)
+            .aggregate(
                 discount=Sum(
                     (F("regular_price") - F("discounted_price"))
                     * F("quantity")
                 )
-            ).get("discount")
+            )
+            .get("discount")
             or 0
         )
 
@@ -795,8 +806,8 @@ class Cart(models.Model):
 class CartItemManager(models.Manager):
     def create(self, **kwargs: Mapping[str, Any]):
         """Check if a product item is already in the cart.
-        If it's there - increase the quantity.
-        If it's not - create a new cart item.
+        If it's there - increase or set quantity.
+        If it's not - create new cart item.
         """
         cart = kwargs.get("cart")
         product = kwargs.get("product")
@@ -930,6 +941,20 @@ class CartItem(models.Model):
         cart.save(update_fields=("updated_at",))
         return cart_item
 
+    def refresh_from_product_item(self) -> None:
+        product_info = self.product.to_dict()
+        self.regular_price = product_info.get("regular_price")
+        self.discount = product_info.get("discount")
+        self.discounted_price = product_info.get("discounted_price")
+        self.save(
+            update_fields=(
+                "regular_price",
+                "discount",
+                "discounted_price",
+                "updated_at",
+            )
+        )
+
     def to_dict(self) -> dict:
         return {
             # "cart": self.cart,
@@ -949,19 +974,27 @@ class CartItem(models.Model):
             self.quantity = quantity
         else:
             self.quantity += quantity
-        self.save(update_fields=("quantity",))
+        self.save(update_fields=("quantity", "updated_at"))
 
     @decimalize()
-    def get_sum(self) -> Decimal:
+    def get_initial_sum(self) -> Decimal:
+        return self.regular_price * self.quantity
+
+    @decimalize()
+    def get_discounted_sum(self) -> Decimal:
         return self.discounted_price * self.quantity
+
+    @decimalize()
+    def get_total_discount(self) -> Decimal:
+        return (self.regular_price - self.discounted_price) * self.quantity
 
     def mark_for_order(self) -> None:
         self.marked_for_order = True
-        self.save(update_fields=("marked_for_order",))
+        self.save(update_fields=("marked_for_order", "updated_at"))
 
     def unmark_for_order(self) -> None:
         self.marked_for_order = False
-        self.save(update_fields=("marked_for_order",))
+        self.save(update_fields=("marked_for_order", "updated_at"))
 
     # view behavior:
     # def add_cart_item(request, prod_id, cart_id, quantity=1):
@@ -1076,13 +1109,19 @@ class Order(models.Model):
         order, _ = cls.objects.get_or_create(
             customer=customer, _status=cls.OrderStatus.PENDING
         )
-        cart = Cart.objects.filter(
-            customer_id=customer.id, status=Cart.CartStatus.IN_PROGRESS
-        ).first()
-        cart_items = cart.items.all()
-        for item in cart_items:
-            if item.marked_for_order:
-                OrderItem.from_cart_item(order, item)
+        try:
+            cart = Cart.objects.get(
+                customer_id=customer.id, status=Cart.CartStatus.IN_PROGRESS
+            )
+        except Cart.DoesNotExist as e:
+            print("Create a Cart and add items before creating an order")
+            raise e
+        # cart = Cart.objects.filter(
+        #    customer_id=customer.id, status=Cart.CartStatus.IN_PROGRESS
+        # ).first()
+        # cart_items = cart.items.all()
+        for item in cart.items_marked_for_order:
+            OrderItem.create_from_cart_item(order, item)
 
         order.final_sum = order.get_total_sum()
         order.save(update_fields=("final_sum",))
@@ -1158,7 +1197,9 @@ class OrderItem(models.Model):
         self.save(update_fields=("quantity",))
 
     @classmethod
-    def from_cart_item(cls, order: Order, cart_item: CartItem, **kwargs):
+    def create_from_cart_item(
+        cls, order: Order, cart_item: CartItem, **kwargs
+    ):
         """Create an order item from a cart item."""
         data = cart_item.to_dict()
         if product := data.get("product"):
