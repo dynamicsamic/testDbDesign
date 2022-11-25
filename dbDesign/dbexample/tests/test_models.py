@@ -417,10 +417,10 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
                 quantity=random.randint(1, available),
             )
             self.assertGreater(self.cart.get_initial_sum(), 0)
-            self.assertTrue(self.cart.items_marked_for_order.exists())
+            self.assertTrue(self.cart.items_ready_for_order.exists())
             cart_item.unmark_for_order()
             self.assertEqual(self.cart.get_initial_sum(), 0)
-            self.assertFalse(self.cart.items_marked_for_order.exists())
+            self.assertFalse(self.cart.items_ready_for_order.exists())
 
     def test_cart_clear_out_deletes_all_items_and_sets_empty_status(self):
         if p_item := models.ProductItem.objects.filter(is_active=True).first():

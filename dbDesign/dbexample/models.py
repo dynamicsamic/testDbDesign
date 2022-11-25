@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.db import models
+from django.db import IntegrityError, models
 from django.db.models import F, Sum
 from django.db.models.query import QuerySet
 from django.http.request import HttpRequest
@@ -750,7 +750,7 @@ class Cart(models.Model):
         return not self.items.exists()
 
     @property
-    def items_marked_for_order(self):
+    def items_ready_for_order(self):
         return self.items.filter(marked_for_order=True)
 
     def clear_out(self):
@@ -942,24 +942,29 @@ class CartItem(models.Model):
         return cart_item
 
     def refresh_from_product_item(self) -> None:
-        product_info = self.product.to_dict()
-        self.regular_price = product_info.get("regular_price")
-        self.discount = product_info.get("discount")
-        self.discounted_price = product_info.get("discounted_price")
-        self.save(
-            update_fields=(
-                "regular_price",
-                "discount",
-                "discounted_price",
-                "updated_at",
-            )
+        """Refresh cart item attribute values with product item info."""
+        self._meta.model.objects.filter(id=self.id).update(
+            **self.product.to_dict()
         )
+        # product_info = self.product.to_dict()
+        # self.regular_price = product_info.get("regular_price")
+        # self.discount = product_info.get("discount")
+        # self.discounted_price = product_info.get("discounted_price")
+        # self.save(
+        #    update_fields=(
+        #        "regular_price",
+        #        "discount",
+        #        "discounted_price",
+        #        "updated_at",
+        #    )
+        # )
 
     def to_dict(self) -> dict:
         return {
             # "cart": self.cart,
             "product": self.product,
             "product_name": self.product_name,
+            "product_id": self.product_id,
             "sku": self.sku,
             "quantity": self.quantity,
             "regular_price": self.regular_price,
@@ -1106,9 +1111,6 @@ class Order(models.Model):
 
     @classmethod
     def create_from_cart(cls, customer: Customer):
-        order, _ = cls.objects.get_or_create(
-            customer=customer, _status=cls.OrderStatus.PENDING
-        )
         try:
             cart = Cart.objects.get(
                 customer_id=customer.id, status=Cart.CartStatus.IN_PROGRESS
@@ -1120,7 +1122,8 @@ class Order(models.Model):
         #    customer_id=customer.id, status=Cart.CartStatus.IN_PROGRESS
         # ).first()
         # cart_items = cart.items.all()
-        for item in cart.items_marked_for_order:
+        order = cls.objects.create(customer=customer)
+        for item in cart.items_ready_for_order:
             OrderItem.create_from_cart_item(order, item)
 
         order.final_sum = order.get_total_sum()
@@ -1179,22 +1182,40 @@ class OrderItem(models.Model):
         blank=True,
         null=True,
     )
+    is_cancelled = models.BooleanField(
+        _("Was order item cancelled"),
+        default=False,
+        help_text=_("required, default: False"),
+    )
 
     def revert(self) -> None:
         """Restore the quantity of stock units when the order is canceled.
         Set quantity item quantity to 0.
         """
-        stock = Stock.objects.filter(product_id=self.product_id).first()
-        stock.add(self.quantity, commit=False)
-        stock.items_sold -= self.quantity
-        stock.save(
-            update_fields=(
-                "current_amount",
-                "items_sold",
+        stock = Stock.objects.filter(product_id=self.product_id)
+        try:
+            cancelled = stock.update(
+                amount=F("amount") + self.quantity,
+                items_sold=F("items_sold") - self.quantity,
             )
-        )
-        self.quantity = 0
-        self.save(update_fields=("quantity",))
+        except IntegrityError as e:
+            print(e)
+            print("invalid values; unable to perform update")
+            raise e
+        except Exception as e:
+            print(f"unknown error: {e}")
+        # stock = Stock.objects.filter(product_id=self.product_id).first()
+        # stock.add(self.quantity, commit=False)
+        # stock.items_sold -= self.quantity
+        # stock.save(
+        #    update_fields=(
+        #        "current_amount",
+        #        "items_sold",
+        #    )
+        # )
+        # self.quantity = 0
+        self.is_cancelled = bool(cancelled)
+        self.save(update_fields=("is_cancelled",))
 
     @classmethod
     def create_from_cart_item(
@@ -1202,27 +1223,40 @@ class OrderItem(models.Model):
     ):
         """Create an order item from a cart item."""
         data = cart_item.to_dict()
-        if product := data.get("product"):
-            stock = product.stock
-            # quantity = data.get("quantity", 1)
-            # if not stock.available(quantity):
-            #    raise ValidationError(_("Not enough product in stock"))
-            # stock.deduct(quantity)
-            try:
-                stock.deduct(quantity := data.get("quantity", 1), commit=False)
-            except NotEnoughProductLeft as e:
-                print(f"{e(quantity)}")
-                raise
-            stock.items_sold += quantity
-            stock.save(
-                update_fields=(
-                    "current_amount",
-                    "items_sold",
-                )
+        stock = Stock.objects.filter(product_id=data.get("product_id"))
+        quantity = data.get("quantity")
+        try:
+            success = stock.update(
+                amount=F("amount") - quantity,
+                items_sold=F("items_sold") + quantity,
             )
-        kwargs.update(data)
-        cart_item.delete()
-        return cls.objects.create(order=order, **kwargs)
+        except IntegrityError as e:
+            print("invalid quantity")
+            raise e
+        except Exception as e:
+            print(f"unknown error: {e}")
+        # if product := data.get("product"):
+        #    stock = product.stock
+        #    # quantity = data.get("quantity", 1)
+        #    # if not stock.available(quantity):
+        #    #    raise ValidationError(_("Not enough product in stock"))
+        #    # stock.deduct(quantity)
+        #    try:
+        #        stock.deduct(quantity := data.get("quantity", 1), commit=False)
+        #    except NotEnoughProductLeft as e:
+        #        print(f"{e(quantity)}")
+        #        raise
+        #    stock.items_sold += quantity
+        #    stock.save(
+        #        update_fields=(
+        #            "current_amount",
+        #            "items_sold",
+        #        )
+        #    )
+        if success:
+            kwargs.update(data)
+            cart_item.delete()
+            return cls.objects.create(order=order, **kwargs)
 
 
 class Comment(models.Model):
