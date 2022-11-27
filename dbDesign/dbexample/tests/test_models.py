@@ -435,6 +435,20 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             self.assertTrue(self.cart.empty)
             self.assertEqual(self.cart.status, models.Cart.CartStatus.EMPTY)
 
+    def test_order_creation(self):
+        if p_item := models.ProductItem.objects.filter(is_active=True).first():
+            available = p_item.stock.amount
+            models.CartItem.create_from_product_item(
+                self.customer.id,
+                p_item.id,
+                quantity=random.randint(1, available),
+            )
+            order = models.Order.create_from_cart(self.customer.id)
+            self.assertTrue(order)
+            print(order.__dict__)
+            for item in order.items.all():
+                print(item.discounted_sum)
+
 
 # from dbexample.models import *
 # c = Cart.objects.first()
