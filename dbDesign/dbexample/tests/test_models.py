@@ -435,6 +435,10 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             self.assertTrue(self.cart.empty)
             self.assertEqual(self.cart.status, models.Cart.CartStatus.EMPTY)
 
+    def test_order_creation_with_empty_cart_fails(self):
+        with self.assertRaises(models.Cart.DoesNotExist):
+            models.Order.create_from_cart(self.customer.id)
+
     def test_order_creation(self):
         if p_item := models.ProductItem.objects.filter(is_active=True).first():
             available = p_item.stock.amount
