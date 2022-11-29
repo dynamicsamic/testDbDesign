@@ -435,17 +435,33 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             self.assertTrue(self.cart.empty)
             self.assertEqual(self.cart.status, models.Cart.CartStatus.EMPTY)
 
-    def test_order_creation_without_cart_fails(self):
+    def test_order_creation_without_cart_raiess_error(self):
         self.cart.delete()
         with self.assertRaises(models.Cart.DoesNotExist):
             models.Order.create_from_cart(self.customer.id)
 
-    def test_order_creation_with_empty_cart_fails(self):
+    def test_order_creation_with_empty_cart_raises_error(self):
         self.assertTrue(self.cart.empty)
         with self.assertRaises(models.Cart.DoesNotExist):
             models.Order.create_from_cart(self.customer.id)
 
-    def test_order_creation_with_non_empty_cart_success(self):
+    def test_order_creation_with_marked_cart_item_success(self):
+        if p_item := models.ProductItem.objects.filter(is_active=True).first():
+            available = p_item.stock.amount
+            models.CartItem.create_from_product_item(
+                self.customer.id,
+                p_item.id,
+                quantity=random.randint(1, available),
+            )
+            self.assertFalse(self.cart.empty)
+            disc_sum = self.cart.get_discounted_sum()
+            active_items = self.cart.items_ready_for_order.count()
+            order = models.Order.create_from_cart(self.customer.id)
+            self.assertTrue(order)
+            self.assertEqual(order.discounted_sum, disc_sum)
+            self.assertEqual(order.items.count(), active_items)
+
+    def test_marked_cart_item_gets_deleted_after_order_creation(self):
         if p_item := models.ProductItem.objects.filter(is_active=True).first():
             available = p_item.stock.amount
             cart_item = models.CartItem.create_from_product_item(
@@ -453,15 +469,24 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
                 p_item.id,
                 quantity=random.randint(1, available),
             )
-            self.assertFalse(self.cart.empty)
-            disc_sum = self.cart.get_discounted_sum()
-            order = models.Order.create_from_cart(self.customer.id)
-            self.assertEqual(order.discounted_sum, disc_sum)
+            models.Order.create_from_cart(self.customer.id)
+            self.assertTrue(self.cart.empty)
+            self.assertTrue(self.cart.status, models.Cart.CartStatus.EMPTY)
+            with self.assertRaises(models.CartItem.DoesNotExist):
+                cart_item.refresh_from_db()
 
-            #
-            # self.assertEqual(
-            #    order.discounted_sum, self.cart.get_discounted_sum()
-            # )
+    def test_order_creation_with_unmarked_cart_item_raises_error(self):
+        if p_item := models.ProductItem.objects.filter(is_active=True).first():
+            available = p_item.stock.amount
+            models.CartItem.create_from_product_item(
+                self.customer.id,
+                p_item.id,
+                quantity=random.randint(1, available),
+                marked_for_order=False,
+            )
+            self.assertFalse(self.cart.empty)
+            with self.assertRaises(models.CartItem.DoesNotExist):
+                models.Order.create_from_cart(self.customer.id)
 
 
 # from dbexample.models import *
