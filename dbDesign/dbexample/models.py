@@ -843,6 +843,39 @@ class Cart(models.Model):
 
 
 class CartItemManager(models.Manager):
+    def create_from_product_item(
+        self, customer_id: int, product_item_id: int, **kwargs: dict
+    ) -> "CartItem":
+        """Create CartItem from ProductItem.
+        Prevent creating cart items from inactive products
+        and products that don't have enough stock items.
+        Fetch stock data along with the product item
+        to prevent additional db queries.
+        """
+        try:
+            cart = Cart.objects.get(customer_id=customer_id)
+            product_item = ProductItem.objects.select_related("stock").get(
+                id=product_item_id
+            )
+        except (Cart.DoesNotExist, ProductItem.DoesNotExist) as e:
+            print(e)
+            raise
+        if not product_item.is_active:
+            raise ValidationError(
+                _("Inactive products can't be added to cart")
+            )
+        if not product_item.stock.available(kwargs.get("quantity", 1)):
+            raise ValidationError(_("Not enough product in stock"))
+            # maybe need to deduct from stock to reserve items for order
+            # but then need to keep notice of cleansing the cart periodically
+        # product_data = product_item.to_dict()
+        # kwargs.update(product_data)
+        cart_item = self.create(
+            cart=cart, product=product_item, **kwargs, **product_item.to_dict()
+        )
+        cart.save(update_fields=("updated_at",))
+        return cart_item
+
     def create(self, **kwargs: Mapping[str, Any]) -> "CartItem":
         """Check if a product item is already in the cart.
         If it's there - increase or set quantity.
@@ -957,39 +990,39 @@ class CartItem(models.Model):
             )
         return deleted
 
-    @classmethod
-    def create_from_product_item(
-        cls, customer_id: int, product_item_id: int, **kwargs: dict
-    ) -> "CartItem":
-        """Create CartItem from ProductItem.
-        Prevent creating cart items from inactive products
-        and products that don't have enough stock items.
-        Fetch stock data along with the product item
-        to prevent additional db queries.
-        """
-        try:
-            cart = Cart.objects.get(customer_id=customer_id)
-            product_item = ProductItem.objects.select_related("stock").get(
-                id=product_item_id
-            )
-        except (Cart.DoesNotExist, ProductItem.DoesNotExist) as e:
-            print(e)
-            raise
-        if not product_item.is_active:
-            raise ValidationError(
-                _("Inactive products can't be added to cart")
-            )
-        if not product_item.stock.available(kwargs.get("quantity", 1)):
-            raise ValidationError(_("Not enough product in stock"))
-            # maybe need to deduct from stock to reserve items for order
-            # but then need to keep notice of cleansing the cart periodically
-        # product_data = product_item.to_dict()
-        # kwargs.update(product_data)
-        cart_item = cls.objects.create(
-            cart=cart, product=product_item, **kwargs, **product_item.to_dict()
-        )
-        cart.save(update_fields=("updated_at",))
-        return cart_item
+    # @classmethod
+    # def create_from_product_item(
+    #    cls, customer_id: int, product_item_id: int, **kwargs: dict
+    # ) -> "CartItem":
+    #    """Create CartItem from ProductItem.
+    #    Prevent creating cart items from inactive products
+    #    and products that don't have enough stock items.
+    #    Fetch stock data along with the product item
+    #    to prevent additional db queries.
+    #    """
+    #    try:
+    #        cart = Cart.objects.get(customer_id=customer_id)
+    #        product_item = ProductItem.objects.select_related("stock").get(
+    #            id=product_item_id
+    #        )
+    #    except (Cart.DoesNotExist, ProductItem.DoesNotExist) as e:
+    #        print(e)
+    #        raise
+    #    if not product_item.is_active:
+    #        raise ValidationError(
+    #            _("Inactive products can't be added to cart")
+    #        )
+    #    if not product_item.stock.available(kwargs.get("quantity", 1)):
+    #        raise ValidationError(_("Not enough product in stock"))
+    #        # maybe need to deduct from stock to reserve items for order
+    #        # but then need to keep notice of cleansing the cart periodically
+    #    # product_data = product_item.to_dict()
+    #    # kwargs.update(product_data)
+    #    cart_item = cls.objects.create(
+    #        cart=cart, product=product_item, **kwargs, **product_item.to_dict()
+    #    )
+    #    cart.save(update_fields=("updated_at",))
+    #    return cart_item
 
     def refresh_from_product_item(self) -> None:
         """Refresh cart item attribute values with product item info."""
@@ -1076,6 +1109,36 @@ class CartItem(models.Model):
         }
 
 
+class OrderManager(models.Manager):
+    def create_from_cart(self, customer_id: int, **kwargs: dict) -> "Order":
+        """Create order from cart.
+        Before order creation assert that cart exists
+        and has items with `marked_for_order` attribute set to `True`.
+        Iterate through _marked_ items to create order items.
+        Apply cart attributes to newly created order.
+        """
+        try:
+            cart = Cart.objects.get(
+                customer_id=customer_id, status=Cart.CartStatus.IN_PROGRESS
+            )
+        except Cart.DoesNotExist as e:
+            print(
+                "Create a Cart and add active items before creating an order"
+            )
+            raise e
+        if not cart.items_ready_for_order.exists():
+            raise CartItem.DoesNotExist("No active items in cart")
+
+        order = self.create(**kwargs, **cart.to_dict())
+        for item in cart.items_ready_for_order:
+            OrderItem.objects.create_from_cart_item(order.id, item)
+            # OrderItem.create_from_cart_item(order, item)
+
+        # order.final_sum = order.get_total_sum()
+        # order.save(update_fields=("final_sum",))
+        return order
+
+
 class Order(models.Model):
     class OrderStatus(models.TextChoices):
         PENDING = "pending"
@@ -1131,6 +1194,8 @@ class Order(models.Model):
         auto_now=True,
     )
 
+    objects = OrderManager()
+
     def __str__(self) -> str:
         return f"Order {self.id} for customer {self.customer_id}"
 
@@ -1145,28 +1210,28 @@ class Order(models.Model):
         else:
             raise ValueError(f"{value} is not a valid choice for OrderStatus")
 
-    @classmethod
-    def create_from_cart(cls, customer_id: int, **kwargs: dict) -> "Order":
-        try:
-            cart = Cart.objects.get(
-                customer_id=customer_id, status=Cart.CartStatus.IN_PROGRESS
-            )
-        except Cart.DoesNotExist as e:
-            print(
-                "Create a Cart and add active items before creating an order"
-            )
-            raise e
-        if not cart.items_ready_for_order.exists():
-            raise CartItem.DoesNotExist("No active items in cart")
-
-        order = cls.objects.create(**kwargs, **cart.to_dict())
-        for item in cart.items_ready_for_order:
-            OrderItem.create_from_cart_item(order, item)
-
-        # order.final_sum = order.get_total_sum()
-        # order.save(update_fields=("final_sum",))
-        return order
-
+    # @classmethod
+    # def create_from_cart(cls, customer_id: int, **kwargs: dict) -> "Order":
+    #    try:
+    #        cart = Cart.objects.get(
+    #            customer_id=customer_id, status=Cart.CartStatus.IN_PROGRESS
+    #        )
+    #    except Cart.DoesNotExist as e:
+    #        print(
+    #            "Create a Cart and add active items before creating an order"
+    #        )
+    #        raise e
+    #    if not cart.items_ready_for_order.exists():
+    #        raise CartItem.DoesNotExist("No active items in cart")
+    #
+    #    order = cls.objects.create(**kwargs, **cart.to_dict())
+    #    for item in cart.items_ready_for_order:
+    #        OrderItem.create_from_cart_item(order, item)
+    #
+    #    # order.final_sum = order.get_total_sum()
+    #    # order.save(update_fields=("final_sum",))
+    #    return order
+    #
     def cancel(self):
         """Cancel the order.
         Revert all order items and set specific status."""
@@ -1185,6 +1250,48 @@ class Order(models.Model):
     #    #    OrderItem.objects.filter(order_id=self.id).aggregate(Sum("sum")), 2
     #    # )
     #    pass
+
+
+class OrderItemManager(models.Manager):
+    def create_from_cart_item(
+        self, order_id: int, cart_item: CartItem, **kwargs
+    ) -> "OrderItem":
+        """Create an order item from a cart item."""
+        data = cart_item.to_dict()
+        stock = Stock.objects.filter(product_id=data.get("product_id"))
+        quantity = data.get("quantity")
+        try:
+            success = stock.update(
+                amount=F("amount") - quantity,
+                items_sold=F("items_sold") + quantity,
+            )
+        except IntegrityError as e:
+            print("invalid quantity")
+            raise e
+        except Exception as e:
+            print(f"unknown error: {e}")
+        # if product := data.get("product"):
+        #    stock = product.stock
+        #    # quantity = data.get("quantity", 1)
+        #    # if not stock.available(quantity):
+        #    #    raise ValidationError(_("Not enough product in stock"))
+        #    # stock.deduct(quantity)
+        #    try:
+        #        stock.deduct(quantity := data.get("quantity", 1), commit=False)
+        #    except NotEnoughProductLeft as e:
+        #        print(f"{e(quantity)}")
+        #        raise
+        #    stock.items_sold += quantity
+        #    stock.save(
+        #        update_fields=(
+        #            "current_amount",
+        #            "items_sold",
+        #        )
+        #    )
+        if success:
+            # kwargs.update(data)
+            cart_item.delete()
+            return self.create(order_id=order_id, **kwargs, **data)
 
 
 class OrderItem(models.Model):
@@ -1257,49 +1364,51 @@ class OrderItem(models.Model):
         default=False,
     )
 
+    objects = OrderItemManager()
+
     def __str__(self) -> str:
         return self.product_name
 
-    @classmethod
-    def create_from_cart_item(
-        cls, order: Order, cart_item: CartItem, **kwargs
-    ) -> "OrderItem":
-        """Create an order item from a cart item."""
-        data = cart_item.to_dict()
-        stock = Stock.objects.filter(product_id=data.get("product_id"))
-        quantity = data.get("quantity")
-        try:
-            success = stock.update(
-                amount=F("amount") - quantity,
-                items_sold=F("items_sold") + quantity,
-            )
-        except IntegrityError as e:
-            print("invalid quantity")
-            raise e
-        except Exception as e:
-            print(f"unknown error: {e}")
-        # if product := data.get("product"):
-        #    stock = product.stock
-        #    # quantity = data.get("quantity", 1)
-        #    # if not stock.available(quantity):
-        #    #    raise ValidationError(_("Not enough product in stock"))
-        #    # stock.deduct(quantity)
-        #    try:
-        #        stock.deduct(quantity := data.get("quantity", 1), commit=False)
-        #    except NotEnoughProductLeft as e:
-        #        print(f"{e(quantity)}")
-        #        raise
-        #    stock.items_sold += quantity
-        #    stock.save(
-        #        update_fields=(
-        #            "current_amount",
-        #            "items_sold",
-        #        )
-        #    )
-        if success:
-            # kwargs.update(data)
-            cart_item.delete()
-            return cls.objects.create(order=order, **kwargs, **data)
+    # @classmethod
+    # def create_from_cart_item(
+    #    cls, order: Order, cart_item: CartItem, **kwargs
+    # ) -> "OrderItem":
+    #    """Create an order item from a cart item."""
+    #    data = cart_item.to_dict()
+    #    stock = Stock.objects.filter(product_id=data.get("product_id"))
+    #    quantity = data.get("quantity")
+    #    try:
+    #        success = stock.update(
+    #            amount=F("amount") - quantity,
+    #            items_sold=F("items_sold") + quantity,
+    #        )
+    #    except IntegrityError as e:
+    #        print("invalid quantity")
+    #        raise e
+    #    except Exception as e:
+    #        print(f"unknown error: {e}")
+    #    # if product := data.get("product"):
+    #    #    stock = product.stock
+    #    #    # quantity = data.get("quantity", 1)
+    #    #    # if not stock.available(quantity):
+    #    #    #    raise ValidationError(_("Not enough product in stock"))
+    #    #    # stock.deduct(quantity)
+    #    #    try:
+    #    #        stock.deduct(quantity := data.get("quantity", 1), commit=False)
+    #    #    except NotEnoughProductLeft as e:
+    #    #        print(f"{e(quantity)}")
+    #    #        raise
+    #    #    stock.items_sold += quantity
+    #    #    stock.save(
+    #    #        update_fields=(
+    #    #            "current_amount",
+    #    #            "items_sold",
+    #    #        )
+    #    #    )
+    #    if success:
+    #        # kwargs.update(data)
+    #        cart_item.delete()
+    #        return cls.objects.create(order=order, **kwargs, **data)
 
     def revert(self) -> None:
         """Restore the quantity of stock units when the order is canceled.
