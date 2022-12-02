@@ -306,7 +306,7 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
 
     def test_empty_cart_attributes(self):
         self.assertEqual(self.cart.status, models.Cart.CartStatus.EMPTY)
-        self.assertTrue(self.cart.empty)
+        self.assertTrue(self.cart.is_empty)
 
     def test_add_inactive_prod_item_to_cart_raises_error(self):
         if p_item := models.ProductItem.objects.filter(
@@ -335,7 +335,7 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
                 p_item.id,
                 quantity=random.randint(1, available),
             )
-            self.assertFalse(self.cart.empty)
+            self.assertFalse(self.cart.is_empty)
             self.assertEqual(self.cart.items.count(), 1)
             self.assertNotEqual(self.cart.created_at, self.cart.updated_at)
             self.assertLessEqual(cart_item.quantity, p_item.stock.amount)
@@ -424,7 +424,7 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             self.assertEqual(self.cart.get_initial_sum(), 0)
             self.assertFalse(self.cart.items_ready_for_order.exists())
 
-    def test_cart_clear_out_deletes_all_items_and_sets_empty_status(self):
+    def test_cart_clear_method_deletes_all_items_and_sets_empty_status(self):
         if p_item := models.ProductItem.objects.filter(is_active=True).first():
             available = p_item.stock.amount
             models.CartItem.objects.create_from_product_item(
@@ -432,9 +432,9 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
                 p_item.id,
                 quantity=random.randint(1, available),
             )
-            self.assertFalse(self.cart.empty)
-            self.cart.clear_out()
-            self.assertTrue(self.cart.empty)
+            self.assertFalse(self.cart.is_empty)
+            self.cart.clear()
+            self.assertTrue(self.cart.is_empty)
             self.assertEqual(self.cart.status, models.Cart.CartStatus.EMPTY)
 
     def test_order_creation_without_cart_raiess_error(self):
@@ -443,7 +443,7 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             models.Order.objects.create_from_cart(self.customer.id)
 
     def test_order_creation_with_empty_cart_raises_error(self):
-        self.assertTrue(self.cart.empty)
+        self.assertTrue(self.cart.is_empty)
         with self.assertRaises(models.Cart.DoesNotExist):
             models.Order.objects.create_from_cart(self.customer.id)
 
@@ -455,7 +455,7 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
                 p_item.id,
                 quantity=random.randint(1, available),
             )
-            self.assertFalse(self.cart.empty)
+            self.assertFalse(self.cart.is_empty)
             disc_sum = self.cart.get_discounted_sum()
             active_items = self.cart.items_ready_for_order.count()
             order = models.Order.objects.create_from_cart(self.customer.id)
@@ -472,7 +472,7 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
                 quantity=random.randint(1, available),
             )
             models.Order.objects.create_from_cart(self.customer.id)
-            self.assertTrue(self.cart.empty)
+            self.assertTrue(self.cart.is_empty)
             self.assertTrue(self.cart.status, models.Cart.CartStatus.EMPTY)
             with self.assertRaises(models.CartItem.DoesNotExist):
                 cart_item.refresh_from_db()
@@ -486,9 +486,72 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
                 quantity=random.randint(1, available),
                 marked_for_order=False,
             )
-            self.assertFalse(self.cart.empty)
+            self.assertFalse(self.cart.is_empty)
             with self.assertRaises(models.CartItem.DoesNotExist):
                 models.Order.objects.create_from_cart(self.customer.id)
+
+    def test_order_creation_affects_stock_attributes(self):
+        if p_item := models.ProductItem.objects.filter(is_active=True).first():
+            stock = p_item.stock
+            initial_amount = stock.amount
+            items_sold = stock.items_sold
+            quantity = random.randint(1, initial_amount)
+            models.CartItem.objects.create_from_product_item(
+                self.customer.id,
+                p_item.id,
+                quantity=quantity,
+            )
+            order = models.Order.objects.create_from_cart(self.customer.id)
+            stock.refresh_from_db()
+            self.assertTrue(order)
+            self.assertEqual(stock.amount, initial_amount - quantity)
+            self.assertEqual(stock.items_sold, items_sold + quantity)
+
+    def test_order_canceled_by_customer_success(self):
+        if p_item := models.ProductItem.objects.filter(is_active=True).first():
+            stock = p_item.stock
+            initial_amount = stock.amount
+            items_sold = stock.items_sold
+            quantity = random.randint(1, initial_amount)
+            models.CartItem.objects.create_from_product_item(
+                self.customer.id,
+                p_item.id,
+                quantity=quantity,
+            )
+            order = models.Order.objects.create_from_cart(self.customer.id)
+            order.cancel("customer")
+            self.assertEqual(
+                order.status, models.Order.OrderStatus.CANCELED_BY_CUSTOMER
+            )
+            self.assertTrue(
+                all(item.is_canceled for item in order.items.all())
+            )
+            stock.refresh_from_db()
+            self.assertEqual(stock.amount, initial_amount)
+            self.assertEqual(stock.items_sold, items_sold)
+
+    def test_order_canceled_by_seller_success(self):
+        if p_item := models.ProductItem.objects.filter(is_active=True).first():
+            stock = p_item.stock
+            initial_amount = stock.amount
+            items_sold = stock.items_sold
+            quantity = random.randint(1, initial_amount)
+            models.CartItem.objects.create_from_product_item(
+                self.customer.id,
+                p_item.id,
+                quantity=quantity,
+            )
+            order = models.Order.objects.create_from_cart(self.customer.id)
+            order.cancel("seller")
+            self.assertEqual(
+                order.status, models.Order.OrderStatus.CANCELED_BY_SELLER
+            )
+            self.assertTrue(
+                all(item.is_canceled for item in order.items.all())
+            )
+            stock.refresh_from_db()
+            self.assertEqual(stock.amount, initial_amount)
+            self.assertEqual(stock.items_sold, items_sold)
 
 
 # from dbexample.models import *
