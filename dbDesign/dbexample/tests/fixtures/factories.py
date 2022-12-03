@@ -134,9 +134,9 @@ class BrandFactory(factory.django.DjangoModelFactory):
     vendor = factory.Iterator(models.Vendor.objects.all())
 
 
-class ProductSetFactory(factory.django.DjangoModelFactory):
+class ProductFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = models.ProductSet
+        model = models.Product
 
     #    p_type = factory.Iterator(models.ProductType.objects.all())
     p_type = factory.Sequence(
@@ -166,12 +166,12 @@ class ProductSetFactory(factory.django.DjangoModelFactory):
                 self.categories.add(category)
 
 
-class ProductItemFactory(factory.django.DjangoModelFactory):
+class ProductVersionFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = models.ProductItem
+        model = models.ProductVersion
 
-    product_set = factory.Iterator(models.ProductSet.objects.all())
-    product_name = factory.Sequence(lambda i: f"product_item{i}")
+    product = factory.Iterator(models.Product.objects.all())
+    name = factory.Sequence(lambda i: f"product_version{i}")
     # sku = factory.Sequence(lambda i: f"110_{i}")
     attrs = factory.LazyAttribute(set_random_attrs)
     regular_price = factory.Sequence(
@@ -205,6 +205,6 @@ class StockFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.Stock
 
-    product = factory.Iterator(models.ProductItem.objects.all())
+    p_version = factory.Iterator(models.ProductVersion.objects.all())
     unit = "pcs"
     amount = factory.Sequence(lambda _: fake.pyint(max_value=999))
