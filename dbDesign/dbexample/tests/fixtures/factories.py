@@ -9,10 +9,12 @@ fake = Faker()
 User = get_user_model()
 
 
+PRODUCT_TYPE_NUM = 5
 ATTRIBUTE_NUM = 7
-USER_NUM = CATEGORY_NUM = VENDOR_NUM = PRODUCT_SET_NUM = 10
+USER_NUM = CATEGORY_NUM = VENDOR_NUM = PRODUCT_NUM = 10
 BRAND_NUM = 14
-PRODUCT_ITEM_NUM = 30
+PRODUCT_VERSION_NUM = 30
+
 attribute_names = [
     "cpu",
     "storage",
@@ -59,7 +61,7 @@ def set_random_attrs(obj):
     """A helper function to be passed to LazyAttribute of a factory."""
     return {
         attr.name: random.choice(ATTR_VALUES)
-        for attr in obj.product_set.p_type.attribute_set.all()
+        for attr in obj.product.p_type.attributes.all()
     }
 
 
@@ -99,14 +101,14 @@ class ProductTypeFactory(factory.django.DjangoModelFactory):
     logo = factory.Sequence(lambda i: f"logo_{i}.png")
 
     @factory.post_generation
-    def attribute_set(self, create, extracted, **kwargs):
+    def attributes(self, create, extracted, **kwargs):
         if not create or not extracted:
             return
 
         if extracted:
             extracted = randomize(extracted, ATTRIBUTE_NUM)
             for attribute in extracted:
-                self.attribute_set.add(attribute)
+                self.attributes.add(attribute)
 
 
 class ProductCategoryFactory(factory.django.DjangoModelFactory):
@@ -146,9 +148,9 @@ class ProductFactory(factory.django.DjangoModelFactory):
     brand = factory.Sequence(
         lambda _: random.choice(models.Brand.objects.all())
     )
-    web_id = factory.Sequence(lambda i: f"product_set_web_id_{i}")
-    # slug = factory.Sequence(lambda i: f"product_set_slug_{i}")
-    name = factory.Sequence(lambda i: f"product_set{i}")
+    web_id = factory.Sequence(lambda i: f"product_web_id_{i}")
+    # slug = factory.Sequence(lambda i: f"product_slug_{i}")
+    name = factory.Sequence(lambda i: f"product{i}")
     # description = fake.text()
     description = factory.Faker("sentence", nb_words=9)
     is_active = factory.Sequence(
@@ -208,3 +210,10 @@ class StockFactory(factory.django.DjangoModelFactory):
     p_version = factory.Iterator(models.ProductVersion.objects.all())
     unit = "pcs"
     amount = factory.Sequence(lambda _: fake.pyint(max_value=999))
+
+
+class CartFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.Cart
+
+    customer = factory.Iterator(models.Customer.objects.all())

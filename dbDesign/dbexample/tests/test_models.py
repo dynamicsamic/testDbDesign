@@ -12,9 +12,9 @@ from .fixtures import factories
 
 PRODUCT_TYPE_NUM = 5
 ATTRIBUTE_NUM = 7
-USER_NUM = CATEGORY_NUM = VENDOR_NUM = PRODUCT_SET_NUM = 10
+USER_NUM = CATEGORY_NUM = VENDOR_NUM = PRODUCT_NUM = 10
 BRAND_NUM = 14
-PRODUCT_ITEM_NUM = 30
+PRODUCT_VERSION_NUM = 30
 
 
 class UserCustomerFactoryMixin:
@@ -59,13 +59,15 @@ class DataFactoryMixin(
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.product_sets = factories.ProductFactory.create_batch(
-            PRODUCT_SET_NUM, categories=cls.categories
+        cls.products = factories.ProductFactory.create_batch(
+            PRODUCT_NUM, categories=cls.categories
         )
-        cls.product_items = factories.ProductVersionFactory.create_batch(
-            PRODUCT_ITEM_NUM, favorited_by=cls.customers
+        cls.product_verions = factories.ProductVersionFactory.create_batch(
+            PRODUCT_VERSION_NUM, favorited_by=cls.customers
         )
-        cls.stockpile = factories.StockFactory.create_batch(PRODUCT_ITEM_NUM)
+        cls.stockpile = factories.StockFactory.create_batch(
+            PRODUCT_VERSION_NUM
+        )
 
 
 class UserModelTestCase(UserCustomerFactoryMixin, TestCase):
@@ -203,8 +205,8 @@ class AttributeProductTypeCategoryTestCase(
 class ProductProdVersionStockModelsTestCase(DataFactoryMixin, TestCase):
     def setUp(self):
         self.VALID_STOCK_AMOUNT = 20
-        self.p_set = self.product_sets[0]
-        self.p_item = self.product_items[0]
+        self.p_set = self.products[0]
+        self.p_item = self.product_verions[0]
         self.stock = self.stockpile[0]
 
     def test_prod_set_has_auto_generated_slug_field(self):
@@ -245,13 +247,13 @@ class ProductProdVersionStockModelsTestCase(DataFactoryMixin, TestCase):
     def test_prod_item_creating_item_with_negative_discount_raises_error(self):
         with self.assertRaises(IntegrityError):
             factories.ProductVersionFactory.create(
-                pk=PRODUCT_ITEM_NUM + 1, discount=-1
+                pk=PRODUCT_VERSION_NUM + 1, discount=-1
             )
 
     def test_prod_item_creating_item_with_too_big_discount_raises_error(self):
         with self.assertRaises(IntegrityError):
             factories.ProductVersionFactory.create(
-                pk=PRODUCT_ITEM_NUM + 1, discount=100
+                pk=PRODUCT_VERSION_NUM + 1, discount=100
             )
 
     # test to_dict method if it's not deprecated
@@ -313,7 +315,7 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             is_active=False
         ).first():
             with self.assertRaises(ValidationError):
-                models.CartItem.objects.create_from_product_item(
+                models.CartItem.objects.create_from_product_version(
                     self.customer.id, p_item.id
                 )
 
@@ -325,7 +327,7 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
         ).first():
             available = p_item.stock.amount
             with self.assertRaises(ValidationError):
-                models.CartItem.objects.create_from_product_item(
+                models.CartItem.objects.create_from_product_version(
                     self.customer.id, p_item.id, quantity=available + 1
                 )
 
@@ -334,7 +336,7 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             is_active=True
         ).first():
             available = p_item.stock.amount
-            cart_item = models.CartItem.objects.create_from_product_item(
+            cart_item = models.CartItem.objects.create_from_product_version(
                 self.customer.id,
                 p_item.id,
                 quantity=random.randint(1, available),
@@ -349,21 +351,23 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
                 cart_item.discounted_price, p_item.discounted_price
             )
 
-    def test_cart_item_adding_the_same_product_item_increases_quantity(self):
+    def test_cart_item_adding_the_same_product_version_increases_quantity(
+        self,
+    ):
         FIRST_ADDED_QUANTITY = 2
         NEXT_ADDED_QUANTITY = 5
         if p_item := models.ProductVersion.objects.filter(
             is_active=True
         ).first():
             p_item.stock.add(10)
-            cart_item = models.CartItem.objects.create_from_product_item(
+            cart_item = models.CartItem.objects.create_from_product_version(
                 self.customer.id,
                 p_item.id,
                 quantity=FIRST_ADDED_QUANTITY,
             )
             self.assertEqual(self.cart.items.count(), 1)
             self.assertEqual(cart_item.quantity, FIRST_ADDED_QUANTITY)
-            cart_item2 = models.CartItem.objects.create_from_product_item(
+            cart_item2 = models.CartItem.objects.create_from_product_version(
                 self.customer.id,
                 p_item.id,
                 quantity=NEXT_ADDED_QUANTITY,
@@ -379,7 +383,7 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             is_active=True
         ).first():
             available = p_item.stock.amount
-            models.CartItem.objects.create_from_product_item(
+            models.CartItem.objects.create_from_product_version(
                 self.customer.id,
                 p_item.id,
                 quantity=random.randint(1, available),
@@ -395,7 +399,7 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             is_active=True
         ).first():
             available = p_item.stock.amount
-            models.CartItem.objects.create_from_product_item(
+            models.CartItem.objects.create_from_product_version(
                 self.customer.id,
                 p_item.id,
                 quantity=random.randint(1, available),
@@ -411,7 +415,7 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             is_active=True
         ).first():
             available = p_item.stock.amount
-            models.CartItem.objects.create_from_product_item(
+            models.CartItem.objects.create_from_product_version(
                 self.customer.id,
                 p_item.id,
                 quantity=random.randint(1, available),
@@ -427,7 +431,7 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             is_active=True
         ).first():
             available = p_item.stock.amount
-            cart_item = models.CartItem.objects.create_from_product_item(
+            cart_item = models.CartItem.objects.create_from_product_version(
                 self.customer.id,
                 p_item.id,
                 quantity=random.randint(1, available),
@@ -443,7 +447,7 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             is_active=True
         ).first():
             available = p_item.stock.amount
-            models.CartItem.objects.create_from_product_item(
+            models.CartItem.objects.create_from_product_version(
                 self.customer.id,
                 p_item.id,
                 quantity=random.randint(1, available),
@@ -468,7 +472,7 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             is_active=True
         ).first():
             available = p_item.stock.amount
-            models.CartItem.objects.create_from_product_item(
+            models.CartItem.objects.create_from_product_version(
                 self.customer.id,
                 p_item.id,
                 quantity=random.randint(1, available),
@@ -486,7 +490,7 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             is_active=True
         ).first():
             available = p_item.stock.amount
-            cart_item = models.CartItem.objects.create_from_product_item(
+            cart_item = models.CartItem.objects.create_from_product_version(
                 self.customer.id,
                 p_item.id,
                 quantity=random.randint(1, available),
@@ -502,7 +506,7 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             is_active=True
         ).first():
             available = p_item.stock.amount
-            models.CartItem.objects.create_from_product_item(
+            models.CartItem.objects.create_from_product_version(
                 self.customer.id,
                 p_item.id,
                 quantity=random.randint(1, available),
@@ -520,7 +524,7 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             initial_amount = stock.amount
             items_sold = stock.items_sold
             quantity = random.randint(1, initial_amount)
-            models.CartItem.objects.create_from_product_item(
+            models.CartItem.objects.create_from_product_version(
                 self.customer.id,
                 p_item.id,
                 quantity=quantity,
@@ -539,7 +543,7 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             initial_amount = stock.amount
             items_sold = stock.items_sold
             quantity = random.randint(1, initial_amount)
-            models.CartItem.objects.create_from_product_item(
+            models.CartItem.objects.create_from_product_version(
                 self.customer.id,
                 p_item.id,
                 quantity=quantity,
@@ -564,7 +568,7 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             initial_amount = stock.amount
             items_sold = stock.items_sold
             quantity = random.randint(1, initial_amount)
-            models.CartItem.objects.create_from_product_item(
+            models.CartItem.objects.create_from_product_version(
                 self.customer.id,
                 p_item.id,
                 quantity=quantity,
