@@ -44,7 +44,7 @@ class AttributeProdTypeCategoryMixin:
             ATTRIBUTE_NUM
         )
         cls.p_types = factories.ProductTypeFactory.create_batch(
-            PRODUCT_TYPE_NUM, attribute_set=cls.attributes
+            PRODUCT_TYPE_NUM, attributes=cls.attributes
         )
         cls.categories = factories.ProductCategoryFactory.create_batch(
             CATEGORY_NUM
@@ -153,7 +153,7 @@ class AttributeProductTypeCategoryTestCase(
         self.assertTrue(self.p_type.slug)
 
     def test_adding_duplicate_attribute_to_prod_type_raises_error(self):
-        attr = self.p_type.attribute_set.first()
+        attr = self.p_type.attributes.first()
         with self.assertRaises(IntegrityError):
             models.ProductTypeToAttributeLinkTable.objects.create(
                 product_type=self.p_type, attr=attr
@@ -163,14 +163,10 @@ class AttributeProductTypeCategoryTestCase(
         attr_set = models.ProductTypeToAttributeLinkTable.objects.filter(
             product_type=self.p_type
         )
-        self.assertEqual(
-            len(self.p_type.attribute_set.all()), attr_set.count()
-        )
+        self.assertEqual(len(self.p_type.attributes.all()), attr_set.count())
         attr = models.ProductAttribute.objects.create(name="fake attribute")
-        self.p_type.attribute_set.add(attr)
-        self.assertEqual(
-            len(self.p_type.attribute_set.all()), attr_set.count()
-        )
+        self.p_type.attributes.add(attr)
+        self.assertEqual(len(self.p_type.attributes.all()), attr_set.count())
 
     def test_create_prod_type_with_same_name_raises_error(self):
         with self.assertRaises(IntegrityError):
@@ -205,36 +201,41 @@ class AttributeProductTypeCategoryTestCase(
 class ProductProdVersionStockModelsTestCase(DataFactoryMixin, TestCase):
     def setUp(self):
         self.VALID_STOCK_AMOUNT = 20
-        self.p_set = self.products[0]
-        self.p_item = self.product_verions[0]
+        self.product = self.products[0]
+        self.prod_version = self.product_verions[0]
         self.stock = self.stockpile[0]
 
     def test_prod_set_has_auto_generated_slug_field(self):
-        self.assertTrue(self.p_set.slug)
+        self.assertTrue(self.product.slug)
 
-    def test_prod_item_has_custom_manager(self):
+    def test_product_version_has_custom_manager(self):
         self.assertIsInstance(
-            self.p_item._meta.model.objects, models.ProductVersionManager
+            self.prod_version._meta.model.objects, models.ProductVersionManager
         )
 
-    def test_prod_item_has_auto_generated_sku_field(self):
-        self.assertTrue(self.p_item.sku)
-        self.assertEqual(self.p_item.sku, self.p_item._generate_sku())
+    def test_product_version_has_auto_generated_sku_field(self):
+        self.assertTrue(self.prod_version.sku)
+        self.assertEqual(
+            self.prod_version.sku, self.prod_version._generate_sku()
+        )
 
-    def test_prod_item_setting_views_raises_error(self):
+    def test_product_version_name_created_from_general_product(self):
+        self.assertTrue(self.prod_version.name.startswith(self.product.name))
+
+    def test_product_version_setting_views_raises_error(self):
         with self.assertRaises(AttributeError):
-            self.p_item.views = 20
+            self.prod_version.views = 20
 
-    def test_prod_item_increment_view_count_success(self):
-        views = self.p_item.views
-        self.p_item.increment_view_count()
-        self.p_item.refresh_from_db()
-        self.assertEqual(self.p_item.views, views + 1)
+    def test_product_version_increment_view_count_success(self):
+        views = self.prod_version.views
+        self.prod_version.increment_view_count()
+        self.prod_version.refresh_from_db()
+        self.assertEqual(self.prod_version.views, views + 1)
 
-    def test_prod_item_discounted_price_returns_correct_result(self):
-        disc_price_generated = self.p_item.discounted_price
-        reg_price = self.p_item.regular_price
-        disc = self.p_item.discount
+    def test_product_version_discounted_price_returns_correct_result(self):
+        disc_price_generated = self.prod_version.discounted_price
+        reg_price = self.prod_version.regular_price
+        disc = self.prod_version.discount
         disc_price_counted = float(reg_price) - (
             float(reg_price) * (disc / 100)
         )
@@ -244,13 +245,17 @@ class ProductProdVersionStockModelsTestCase(DataFactoryMixin, TestCase):
             format(disc_price_counted, ".2f"),
         )
 
-    def test_prod_item_creating_item_with_negative_discount_raises_error(self):
+    def test_product_version_creating_item_with_negative_discount_raises_error(
+        self,
+    ):
         with self.assertRaises(IntegrityError):
             factories.ProductVersionFactory.create(
                 pk=PRODUCT_VERSION_NUM + 1, discount=-1
             )
 
-    def test_prod_item_creating_item_with_too_big_discount_raises_error(self):
+    def test_product_version_creating_item_with_too_big_discount_raises_error(
+        self,
+    ):
         with self.assertRaises(IntegrityError):
             factories.ProductVersionFactory.create(
                 pk=PRODUCT_VERSION_NUM + 1, discount=100
@@ -310,45 +315,45 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
         self.assertEqual(self.cart.status, models.Cart.CartStatus.EMPTY)
         self.assertTrue(self.cart.is_empty)
 
-    def test_add_inactive_prod_item_to_cart_raises_error(self):
-        if p_item := models.ProductVersion.objects.filter(
+    def test_add_inactive_product_version_to_cart_raises_error(self):
+        if prod_version := models.ProductVersion.objects.filter(
             is_active=False
         ).first():
             with self.assertRaises(ValidationError):
                 models.CartItem.objects.create_from_product_version(
-                    self.customer.id, p_item.id
+                    self.customer.id, prod_version.id
                 )
 
-    def test_add_prod_item_quantity_more_than_stock_available_raises_error(
+    def test_add_product_version_quantity_more_than_stock_available_raises_error(
         self,
     ):
-        if p_item := models.ProductVersion.objects.filter(
+        if prod_version := models.ProductVersion.objects.filter(
             is_active=True
         ).first():
-            available = p_item.stock.amount
+            available = prod_version.stock.amount
             with self.assertRaises(ValidationError):
                 models.CartItem.objects.create_from_product_version(
-                    self.customer.id, p_item.id, quantity=available + 1
+                    self.customer.id, prod_version.id, quantity=available + 1
                 )
 
-    def test_add_prod_item_valid_quantity_success(self):
-        if p_item := models.ProductVersion.objects.filter(
+    def test_add_product_version_valid_quantity_success(self):
+        if prod_version := models.ProductVersion.objects.filter(
             is_active=True
         ).first():
-            available = p_item.stock.amount
+            available = prod_version.stock.amount
             cart_item = models.CartItem.objects.create_from_product_version(
                 self.customer.id,
-                p_item.id,
+                prod_version.id,
                 quantity=random.randint(1, available),
             )
             self.assertFalse(self.cart.is_empty)
             self.assertEqual(self.cart.items.count(), 1)
             self.assertNotEqual(self.cart.created_at, self.cart.updated_at)
-            self.assertLessEqual(cart_item.quantity, p_item.stock.amount)
-            self.assertEqual(cart_item.sku, p_item.sku)
-            self.assertEqual(cart_item.product_name, p_item.product_name)
+            self.assertLessEqual(cart_item.quantity, prod_version.stock.amount)
+            self.assertEqual(cart_item.sku, prod_version.sku)
+            self.assertEqual(cart_item.product_name, prod_version.product_name)
             self.assertEqual(
-                cart_item.discounted_price, p_item.discounted_price
+                cart_item.discounted_price, prod_version.discounted_price
             )
 
     def test_cart_item_adding_the_same_product_version_increases_quantity(
@@ -356,20 +361,20 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
     ):
         FIRST_ADDED_QUANTITY = 2
         NEXT_ADDED_QUANTITY = 5
-        if p_item := models.ProductVersion.objects.filter(
+        if prod_version := models.ProductVersion.objects.filter(
             is_active=True
         ).first():
-            p_item.stock.add(10)
+            prod_version.stock.add(10)
             cart_item = models.CartItem.objects.create_from_product_version(
                 self.customer.id,
-                p_item.id,
+                prod_version.id,
                 quantity=FIRST_ADDED_QUANTITY,
             )
             self.assertEqual(self.cart.items.count(), 1)
             self.assertEqual(cart_item.quantity, FIRST_ADDED_QUANTITY)
             cart_item2 = models.CartItem.objects.create_from_product_version(
                 self.customer.id,
-                p_item.id,
+                prod_version.id,
                 quantity=NEXT_ADDED_QUANTITY,
             )
             self.assertEqual(self.cart.items.count(), 1)
@@ -379,13 +384,13 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             self.assertEqual(cart_item.id, cart_item2.id)
 
     def test_cart_get_initial_sum_returns_expected_result(self):
-        if p_item := models.ProductVersion.objects.filter(
+        if prod_version := models.ProductVersion.objects.filter(
             is_active=True
         ).first():
-            available = p_item.stock.amount
+            available = prod_version.stock.amount
             models.CartItem.objects.create_from_product_version(
                 self.customer.id,
-                p_item.id,
+                prod_version.id,
                 quantity=random.randint(1, available),
             )
             expected = sum(
@@ -395,13 +400,13 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             self.assertEqual(self.cart.get_initial_sum(), expected)
 
     def test_cart_get_discounted_sum_returns_expected_result(self):
-        if p_item := models.ProductVersion.objects.filter(
+        if prod_version := models.ProductVersion.objects.filter(
             is_active=True
         ).first():
-            available = p_item.stock.amount
+            available = prod_version.stock.amount
             models.CartItem.objects.create_from_product_version(
                 self.customer.id,
-                p_item.id,
+                prod_version.id,
                 quantity=random.randint(1, available),
             )
             expected = sum(
@@ -411,13 +416,13 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             self.assertEqual(self.cart.get_discounted_sum(), expected)
 
     def test_cart_get_total_discount_returns_expected_result(self):
-        if p_item := models.ProductVersion.objects.filter(
+        if prod_version := models.ProductVersion.objects.filter(
             is_active=True
         ).first():
-            available = p_item.stock.amount
+            available = prod_version.stock.amount
             models.CartItem.objects.create_from_product_version(
                 self.customer.id,
-                p_item.id,
+                prod_version.id,
                 quantity=random.randint(1, available),
             )
             expected = sum(
@@ -427,13 +432,13 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             self.assertEqual(self.cart.get_total_discount(), expected)
 
     def test_cart_item_unmark_for_order_prevents_from_being_counted(self):
-        if p_item := models.ProductVersion.objects.filter(
+        if prod_version := models.ProductVersion.objects.filter(
             is_active=True
         ).first():
-            available = p_item.stock.amount
+            available = prod_version.stock.amount
             cart_item = models.CartItem.objects.create_from_product_version(
                 self.customer.id,
-                p_item.id,
+                prod_version.id,
                 quantity=random.randint(1, available),
             )
             self.assertGreater(self.cart.get_initial_sum(), 0)
@@ -443,13 +448,13 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             self.assertFalse(self.cart.items_ready_for_order.exists())
 
     def test_cart_clear_method_deletes_all_items_and_sets_empty_status(self):
-        if p_item := models.ProductVersion.objects.filter(
+        if prod_version := models.ProductVersion.objects.filter(
             is_active=True
         ).first():
-            available = p_item.stock.amount
+            available = prod_version.stock.amount
             models.CartItem.objects.create_from_product_version(
                 self.customer.id,
-                p_item.id,
+                prod_version.id,
                 quantity=random.randint(1, available),
             )
             self.assertFalse(self.cart.is_empty)
@@ -468,13 +473,13 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             models.Order.objects.create_from_cart(self.customer.id)
 
     def test_order_creation_with_marked_cart_item_success(self):
-        if p_item := models.ProductVersion.objects.filter(
+        if prod_version := models.ProductVersion.objects.filter(
             is_active=True
         ).first():
-            available = p_item.stock.amount
+            available = prod_version.stock.amount
             models.CartItem.objects.create_from_product_version(
                 self.customer.id,
-                p_item.id,
+                prod_version.id,
                 quantity=random.randint(1, available),
             )
             self.assertFalse(self.cart.is_empty)
@@ -486,13 +491,13 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             self.assertEqual(order.items.count(), active_items)
 
     def test_marked_cart_item_gets_deleted_after_order_creation(self):
-        if p_item := models.ProductVersion.objects.filter(
+        if prod_version := models.ProductVersion.objects.filter(
             is_active=True
         ).first():
-            available = p_item.stock.amount
+            available = prod_version.stock.amount
             cart_item = models.CartItem.objects.create_from_product_version(
                 self.customer.id,
-                p_item.id,
+                prod_version.id,
                 quantity=random.randint(1, available),
             )
             models.Order.objects.create_from_cart(self.customer.id)
@@ -502,13 +507,13 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
                 cart_item.refresh_from_db()
 
     def test_order_creation_with_unmarked_cart_item_raises_error(self):
-        if p_item := models.ProductVersion.objects.filter(
+        if prod_version := models.ProductVersion.objects.filter(
             is_active=True
         ).first():
-            available = p_item.stock.amount
+            available = prod_version.stock.amount
             models.CartItem.objects.create_from_product_version(
                 self.customer.id,
-                p_item.id,
+                prod_version.id,
                 quantity=random.randint(1, available),
                 marked_for_order=False,
             )
@@ -517,16 +522,16 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
                 models.Order.objects.create_from_cart(self.customer.id)
 
     def test_order_creation_affects_stock_attributes(self):
-        if p_item := models.ProductVersion.objects.filter(
+        if prod_version := models.ProductVersion.objects.filter(
             is_active=True
         ).first():
-            stock = p_item.stock
+            stock = prod_version.stock
             initial_amount = stock.amount
             items_sold = stock.items_sold
             quantity = random.randint(1, initial_amount)
             models.CartItem.objects.create_from_product_version(
                 self.customer.id,
-                p_item.id,
+                prod_version.id,
                 quantity=quantity,
             )
             order = models.Order.objects.create_from_cart(self.customer.id)
@@ -536,16 +541,16 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             self.assertEqual(stock.items_sold, items_sold + quantity)
 
     def test_order_canceled_by_customer_success(self):
-        if p_item := models.ProductVersion.objects.filter(
+        if prod_version := models.ProductVersion.objects.filter(
             is_active=True
         ).first():
-            stock = p_item.stock
+            stock = prod_version.stock
             initial_amount = stock.amount
             items_sold = stock.items_sold
             quantity = random.randint(1, initial_amount)
             models.CartItem.objects.create_from_product_version(
                 self.customer.id,
-                p_item.id,
+                prod_version.id,
                 quantity=quantity,
             )
             order = models.Order.objects.create_from_cart(self.customer.id)
@@ -561,16 +566,16 @@ class CartOrderModelsTestCase(DataFactoryMixin, TestCase):
             self.assertEqual(stock.items_sold, items_sold)
 
     def test_order_canceled_by_seller_success(self):
-        if p_item := models.ProductVersion.objects.filter(
+        if prod_version := models.ProductVersion.objects.filter(
             is_active=True
         ).first():
-            stock = p_item.stock
+            stock = prod_version.stock
             initial_amount = stock.amount
             items_sold = stock.items_sold
             quantity = random.randint(1, initial_amount)
             models.CartItem.objects.create_from_product_version(
                 self.customer.id,
-                p_item.id,
+                prod_version.id,
                 quantity=quantity,
             )
             order = models.Order.objects.create_from_cart(self.customer.id)
