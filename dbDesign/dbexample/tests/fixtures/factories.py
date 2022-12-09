@@ -3,17 +3,34 @@ import random
 import factory
 from dbexample import models
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from faker import Faker
 
 fake = Faker()
 User = get_user_model()
 
 
-PRODUCT_TYPE_NUM = 5
+PRODUCT_TYPE_NUM = DISCOUNT_NUM = 5
 ATTRIBUTE_NUM = 7
 USER_NUM = CATEGORY_NUM = VENDOR_NUM = PRODUCT_NUM = 10
 BRAND_NUM = 14
 PRODUCT_VERSION_NUM = 30
+
+discount_starts_at = (
+    "2022-07-02 20:35:19.799050+00:00",
+    "2022-08-02 20:35:19.799050+00:00",
+    "2022-09-02 20:35:19.799050+00:00",
+    "2022-10-02 20:35:19.799050+00:00",
+    "2022-11-02 20:35:19.799050+00:00",
+)
+
+discount_ends_at = (
+    "2022-08-03 20:35:19.799050+00:00",
+    "2022-09-15 20:35:19.799050+00:00",
+    "2022-10-02 20:35:19.799050+00:00",
+    "2022-12-02 20:35:19.799050+00:00",
+    "2023-02-02 20:35:19.799050+00:00",
+)
 
 attribute_names = [
     "cpu",
@@ -136,6 +153,24 @@ class BrandFactory(factory.django.DjangoModelFactory):
     vendor = factory.Iterator(models.Vendor.objects.all())
 
 
+class ProductDiscountFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = models.ProductDiscount
+
+    label = factory.Sequence(lambda i: f"discount_{i}")
+    rate = factory.Sequence(lambda _: fake.pyint(min_value=0, max_value=99))
+    starts_at = factory.Iterator(discount_starts_at)
+    # starts_at = factory.Sequence(
+    #    lambda _: fake.date_time_this_decade(
+    #        tzinfo=timezone.get_current_timezone()
+    #    )
+    # )
+    ends_at = factory.Iterator(discount_ends_at)
+    is_active = factory.Sequence(
+        lambda _: bool(*random.choices((1, 0), weights=(0.8, 0.2)))
+    )
+
+
 class ProductFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = models.Product
@@ -181,9 +216,9 @@ class ProductVersionFactory(factory.django.DjangoModelFactory):
             left_digits=random.randint(1, 7), right_digits=2, positive=True
         )
     )
-    discount = factory.Sequence(
-        lambda _: fake.pyint(min_value=0, max_value=99)
-    )
+    # discount = factory.Sequence(
+    #    lambda _: fake.pyint(min_value=0, max_value=99)
+    # )
     # discount = fake.pyint(min_value=0, max_value=99)
     #    is_active = factory.Iterator([True, True, True, False, True])
     is_active = factory.Sequence(

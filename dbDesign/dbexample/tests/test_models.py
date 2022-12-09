@@ -10,7 +10,7 @@ from .. import models as models
 from ..exceptions import NotEnoughProductLeft, TooBigToAdd
 from .fixtures import factories
 
-PRODUCT_TYPE_NUM = 5
+PRODUCT_TYPE_NUM = DISCOUNT_NUM = 5
 ATTRIBUTE_NUM = 7
 USER_NUM = CATEGORY_NUM = VENDOR_NUM = PRODUCT_NUM = 10
 BRAND_NUM = 14
@@ -61,6 +61,9 @@ class DataFactoryMixin(
         super().setUpClass()
         cls.products = factories.ProductFactory.create_batch(
             PRODUCT_NUM, categories=cls.categories
+        )
+        cls.discounts = factories.ProductDiscountFactory.create_batch(
+            DISCOUNT_NUM
         )
         cls.product_verions = factories.ProductVersionFactory.create_batch(
             PRODUCT_VERSION_NUM, favorited_by=cls.customers
@@ -198,7 +201,9 @@ class AttributeProductTypeCategoryTestCase(
             models.ProductCategory.objects.create(name=self.category.name)
 
 
-class ProductProdVersionStockModelsTestCase(DataFactoryMixin, TestCase):
+class ProductProdVersionProdDiscountStockModelsTestCase(
+    DataFactoryMixin, TestCase
+):
     def setUp(self):
         self.VALID_STOCK_AMOUNT = 20
         self.product = self.products[0]
@@ -207,6 +212,19 @@ class ProductProdVersionStockModelsTestCase(DataFactoryMixin, TestCase):
 
     def test_prod_set_has_auto_generated_slug_field(self):
         self.assertTrue(self.product.slug)
+
+    def test_discount(self):
+        print(self.discounts)
+        # data = {
+        #    "label": "some_label",
+        #    "rate": 20,
+        #    "starts_at": "2022-12-09 20:35:19.799050+00:00",
+        #    # "starts_at": "2021-03-03T16:55:29Z",
+        #    "ends_at": "2022-03-03T16:55:29Z",
+        # }
+        # disc = models.ProductDiscount.objects.create(**data)
+        # print(disc.starts_at)
+        # print(self.product.created_at)
 
     def test_product_version_has_custom_manager(self):
         self.assertIsInstance(
