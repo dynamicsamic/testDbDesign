@@ -210,21 +210,50 @@ class ProductProdVersionProdDiscountStockModelsTestCase(
         self.prod_version = self.product_verions[0]
         self.stock = self.stockpile[0]
 
-    def test_prod_set_has_auto_generated_slug_field(self):
+    def test_product_has_auto_generated_slug_field(self):
         self.assertTrue(self.product.slug)
 
-    def test_discount(self):
-        print(self.discounts)
-        # data = {
-        #    "label": "some_label",
-        #    "rate": 20,
-        #    "starts_at": "2022-12-09 20:35:19.799050+00:00",
-        #    # "starts_at": "2021-03-03T16:55:29Z",
-        #    "ends_at": "2022-03-03T16:55:29Z",
-        # }
-        # disc = models.ProductDiscount.objects.create(**data)
-        # print(disc.starts_at)
-        # print(self.product.created_at)
+    def test_product_has_prod_type_foreign_key(self):
+        self.assertIsInstance(self.product.p_type, models.ProductType)
+
+    def test_product_has_brand_foreign_key(self):
+        self.assertIsInstance(self.product.brand, models.Brand)
+
+    def test_product_has_category_many_to_many(self):
+        categories = self.product.categories.all()
+        self.assertTrue(categories)
+        self.assertTrue(
+            all(
+                isinstance(category, models.ProductCategory)
+                for category in categories
+            )
+        )
+
+    def test_product_can_set_discount_to_its_versions(self):
+        versions = self.product.versions
+        if versions.exists():
+
+            # initially set all versions discount to None
+            versions.update(discount=None)
+            self.assertTrue(
+                all(version.discount is None for version in versions.all())
+            )
+
+            from django.utils import timezone
+
+            now = timezone.now()
+            if discount := models.ProductDiscount.objects.filter(
+                is_active=True, starts_at__lte=now, ends_at__gt=now
+            ).first():
+                versions_len = versions.count()
+                updated = self.product.set_discount_for_versions(discount.id)
+                self.assertEqual(updated, versions_len)
+                self.assertTrue(
+                    all(
+                        version.discount_id == discount.id
+                        for version in versions.all()
+                    )
+                )
 
     def test_product_version_has_custom_manager(self):
         self.assertIsInstance(
@@ -278,6 +307,14 @@ class ProductProdVersionProdDiscountStockModelsTestCase(
             factories.ProductVersionFactory.create(
                 pk=PRODUCT_VERSION_NUM + 1, discount=100
             )
+
+    def test_product_versions_have_discount_foreign_key_or_none(self):
+        self.assertTrue(
+            all(
+                isinstance(p.discount, (models.ProductDiscount, type(None)))
+                for p in self.product_verions
+            )
+        )
 
     # test to_dict method if it's not deprecated
 

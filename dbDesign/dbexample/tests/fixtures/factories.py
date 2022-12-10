@@ -19,17 +19,17 @@ PRODUCT_VERSION_NUM = 30
 discount_starts_at = (
     "2022-07-02 20:35:19.799050+00:00",
     "2022-08-02 20:35:19.799050+00:00",
-    "2022-09-02 20:35:19.799050+00:00",
-    "2022-10-02 20:35:19.799050+00:00",
     "2022-11-02 20:35:19.799050+00:00",
+    "2022-11-15 20:35:19.799050+00:00",
+    "2022-12-02 20:35:19.799050+00:00",
 )
 
 discount_ends_at = (
     "2022-08-03 20:35:19.799050+00:00",
     "2022-09-15 20:35:19.799050+00:00",
-    "2022-10-02 20:35:19.799050+00:00",
-    "2022-12-02 20:35:19.799050+00:00",
-    "2023-02-02 20:35:19.799050+00:00",
+    "2022-12-26 20:35:19.799050+00:00",
+    "2023-01-29 20:35:19.799050+00:00",
+    "2023-02-26 20:35:19.799050+00:00",
 )
 
 attribute_names = [
@@ -214,6 +214,11 @@ class ProductVersionFactory(factory.django.DjangoModelFactory):
     regular_price = factory.Sequence(
         lambda _: fake.pydecimal(
             left_digits=random.randint(1, 7), right_digits=2, positive=True
+        )
+    )
+    discount = factory.Sequence(
+        lambda _: random.choice(
+            list(models.ProductDiscount.objects.all()) + [None]
         )
     )
     # discount = factory.Sequence(

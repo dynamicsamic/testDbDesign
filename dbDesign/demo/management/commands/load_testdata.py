@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand
 
 # from ....dbexample.tests.fixtures import factories
 
-PRODUCT_TYPE_NUM = 5
+PRODUCT_TYPE_NUM = DISCOUNT_NUM = 5
 ATTRIBUTE_NUM = 7
 USER_NUM = CATEGORY_NUM = VENDOR_NUM = PRODUCT_NUM = 10
 BRAND_NUM = 14
@@ -35,7 +35,7 @@ class Command(BaseCommand):
         categories = factories.ProductCategoryFactory.create_batch(
             CATEGORY_NUM
         )
-
+        factories.ProductDiscountFactory.create_batch(DISCOUNT_NUM)
         factories.ProductFactory.create_batch(
             PRODUCT_NUM, categories=categories
         )
