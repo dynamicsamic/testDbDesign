@@ -381,7 +381,7 @@ class ProductDiscount(models.Model):
     rate = models.PositiveSmallIntegerField(
         _("Discount rate"),
         help_text=_("required, integer for 0 to 99"),
-        validators=[(MaxValueValidator(99))],
+        validators=[(MaxValueValidator(99)), MinValueValidator(1)],
     )
     starts_at = models.DateTimeField(
         _("Discount valid from"),
@@ -396,6 +396,14 @@ class ProductDiscount(models.Model):
         help_text=_("required, default: False"),
         default=False,
     )
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(rate__lt=100),
+                name="discount_rate_less_than_100",
+            )
+        ]
 
     def __str__(self):
         return f"active: {self.is_active}; {self.starts_at}-{self.ends_at}; {self.rate}%"
@@ -586,31 +594,35 @@ class ProductVersion(models.Model):
 
     objects = ProductVersionManager()
 
-    class Meta:
-        constraints = [
-            models.CheckConstraint(
-                check=models.Q(discount__lt=100), name="discount_less_than_100"
-            )
-        ]
-
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name
 
     @property
     def views(self) -> int:
-        """Get number of customer views for this version."""
+        """Get number of customer views for this product version."""
         return self._view_count
 
     @property
     def discount_rate(self) -> int:
-        """Get version discount rate."""
+        """Get product version discount rate."""
+        discount = 0
         if self.discount_id is None:
-            return 0
-        return (
-            ProductDiscount.objects.values("rate")
-            .get(id=self.discount_id)
-            .get("rate")
-        )
+            return discount
+        if self.discount.is_active:
+            now = timezone.now()
+            if self.discount.starts_at > now or self.discount.ends_at <= now:
+                self.discount.is_active = False
+                self.discount.save(update_fields=("is_active",))
+            else:
+                discount = self.discount.rate
+        return discount
+        # if self.discount_id is None:
+        #    return 0
+        # return (
+        #    ProductDiscount.objects.values("rate")
+        #    .get(id=self.discount_id)
+        #    .get("rate")
+        # )
 
     @property
     @decimalize()
@@ -647,7 +659,7 @@ class ProductVersion(models.Model):
             "name": self.name,
             "sku": self.sku,
             "regular_price": self.regular_price,
-            "discount": self.discount,
+            "discount": self.discount_rate,
             "discounted_price": self.discounted_price,
         }
 

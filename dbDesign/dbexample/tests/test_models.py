@@ -207,7 +207,11 @@ class ProductProdVersionProdDiscountStockModelsTestCase(
     def setUp(self):
         self.VALID_STOCK_AMOUNT = 20
         self.product = self.products[0]
-        self.prod_version = self.product_verions[0]
+        # self.prod_version = self.product_verions[0]
+        self.prod_version = models.ProductVersion.objects.filter(
+            discount__is_active=True
+        ).first()
+        self.assertTrue(self.prod_version)
         self.stock = self.stockpile[0]
 
     def test_product_has_auto_generated_slug_field(self):
@@ -255,6 +259,32 @@ class ProductProdVersionProdDiscountStockModelsTestCase(
                     )
                 )
 
+    def test_product_discount_create_with_negative_discount_raises_error(
+        self,
+    ):
+        discount_data = {
+            "pk": DISCOUNT_NUM + 1,
+            "label": "test_discount",
+            "rate": -20,
+            "starts_at": "2022-11-15 20:35:19.799050+00:00",
+            "ends_at": "2022-12-02 20:35:19.799050+00:00",
+        }
+        with self.assertRaises(IntegrityError):
+            factories.ProductDiscountFactory.create(**discount_data)
+
+    def test_product_discount_create_with_too_big_discount_raises_error(
+        self,
+    ):
+        discount_data = {
+            "pk": DISCOUNT_NUM + 1,
+            "label": "test_discount",
+            "rate": 120,
+            "starts_at": "2022-11-15 20:35:19.799050+00:00",
+            "ends_at": "2022-12-02 20:35:19.799050+00:00",
+        }
+        with self.assertRaises(IntegrityError):
+            factories.ProductDiscountFactory.create(**discount_data)
+
     def test_product_version_has_custom_manager(self):
         self.assertIsInstance(
             self.prod_version._meta.model.objects, models.ProductVersionManager
@@ -279,10 +309,27 @@ class ProductProdVersionProdDiscountStockModelsTestCase(
         self.prod_version.refresh_from_db()
         self.assertEqual(self.prod_version.views, views + 1)
 
+    def test_product_versions_have_discount_foreign_key_or_none(self):
+        self.assertTrue(
+            all(
+                isinstance(p.discount, (models.ProductDiscount, type(None)))
+                for p in self.product_verions
+            )
+        )
+
+    def test_product_version_has_discount_rate_property(self):
+        self.assertEqual(
+            self.prod_version.discount_rate, self.prod_version.discount.rate
+        )
+        self.assertGreaterEqual(self.prod_version.discount_rate, 0)
+        self.prod_version.discount = None
+        self.prod_version.save()
+        self.assertEqual(self.prod_version.discount_rate, 0)
+
     def test_product_version_discounted_price_returns_correct_result(self):
         disc_price_generated = self.prod_version.discounted_price
         reg_price = self.prod_version.regular_price
-        disc = self.prod_version.discount
+        disc = self.prod_version.discount.rate
         disc_price_counted = float(reg_price) - (
             float(reg_price) * (disc / 100)
         )
@@ -290,30 +337,6 @@ class ProductProdVersionProdDiscountStockModelsTestCase(
         self.assertEqual(
             disc_price_generated.to_eng_string(),
             format(disc_price_counted, ".2f"),
-        )
-
-    def test_product_version_creating_item_with_negative_discount_raises_error(
-        self,
-    ):
-        with self.assertRaises(IntegrityError):
-            factories.ProductVersionFactory.create(
-                pk=PRODUCT_VERSION_NUM + 1, discount=-1
-            )
-
-    def test_product_version_creating_item_with_too_big_discount_raises_error(
-        self,
-    ):
-        with self.assertRaises(IntegrityError):
-            factories.ProductVersionFactory.create(
-                pk=PRODUCT_VERSION_NUM + 1, discount=100
-            )
-
-    def test_product_versions_have_discount_foreign_key_or_none(self):
-        self.assertTrue(
-            all(
-                isinstance(p.discount, (models.ProductDiscount, type(None)))
-                for p in self.product_verions
-            )
         )
 
     # test to_dict method if it's not deprecated
