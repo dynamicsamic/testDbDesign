@@ -1,4 +1,5 @@
 import datetime as dt
+import logging
 from decimal import Decimal
 from typing import Any, Dict, Literal, Mapping, Tuple
 
@@ -29,6 +30,8 @@ decimal_sum_settings = {
     "max_digits": 12,
     "decimal_places": 2,
 }
+
+logger = logging.getLogger(__name__)
 
 
 def updated_at() -> Dict[str, dt.datetime]:
@@ -765,6 +768,16 @@ class Stock(models.Model):
         return self.amount >= amount
 
 
+class CartManager(models.Manager):
+    def create(self, **kwargs) -> "Cart":
+        customer = kwargs.get("customer")
+        if customer.status != Customer.CustomerStatus.ACTIVATED:
+            msg = _("Cart creation is available only for active customers")
+            logger.error(msg)
+            raise ValidationError(msg)
+        return super().create(**kwargs)
+
+
 class Cart(models.Model):
     # maybe try: Cart.objects.select_related('customer)?
     class CartStatus(models.TextChoices):
@@ -886,14 +899,16 @@ class CartItemManager(models.Manager):
                 id=product_version_id
             )
         except (Cart.DoesNotExist, ProductVersion.DoesNotExist) as e:
-            print(e)
+            logger.error(f"Model does not exist: {e}")
             raise
         if not p_version.is_active:
-            raise ValidationError(
-                _("Inactive products can't be added to cart")
-            )
+            msg = _("Inactive products can't be added to cart")
+            logger.error(msg)
+            raise ValidationError(msg)
         if not p_version.stock.available(kwargs.get("quantity", 1)):
-            raise ValidationError(_("Not enough product in stock"))
+            msg = _("Not enough product in stock")
+            logger.error(msg)
+            raise ValidationError(msg)
             # maybe need to deduct from stock to reserve items for order
             # but then need to keep notice of cleansing the cart periodically
         cart_item = self.create(
@@ -918,8 +933,8 @@ class CartItemManager(models.Manager):
         except self.model.DoesNotExist:
             cart_item = super().create(**kwargs)
         except Exception as e:
-            print(f"An unexpected error occured: {e}")
-            return
+            logger.error(f"An unexpected error occured: {e}")
+            raise e
         if cart.status == Cart.CartStatus.EMPTY:
             cart.status = Cart.CartStatus.IN_PROGRESS
             cart.save(update_fields=("status",))
@@ -1093,12 +1108,14 @@ class OrderManager(models.Manager):
                 customer_id=customer_id, status=Cart.CartStatus.IN_PROGRESS
             )
         except Cart.DoesNotExist as e:
-            print(
+            logger.error(
                 "Create a Cart and add active items before creating an order"
             )
             raise e
-        if not cart.items_ready_for_order.exists():
-            raise CartItem.DoesNotExist("No active items in cart")
+        if cart.is_empty:
+            msg = _("No active items in cart")
+            logger.error(msg)
+            raise CartItem.DoesNotExist(msg)
 
         order = self.create(**kwargs, **cart.to_dict())
         for item in cart.items_ready_for_order:
@@ -1180,7 +1197,9 @@ class Order(models.Model):
         if stat := getattr(self.OrderStatus, value.upper(), None):
             self._status = stat
         else:
-            raise ValueError(f"{value} is not a valid choice for OrderStatus")
+            msg = f"{value} is not a valid choice for OrderStatus"
+            logger.error(msg)
+            raise ValueError(msg)
 
     def cancel(self, canceled_by: Literal["customer", "seller"]) -> int:
         """Cancel the order.
@@ -1209,10 +1228,11 @@ class OrderItemManager(models.Manager):
                 items_sold=F("items_sold") + quantity,
             )
         except IntegrityError as e:
-            print("invalid quantity")
+            logger.error(_("invalid quantity"))
             raise e
         except Exception as e:
-            print(f"unknown error: {e}")
+            logger.error(f"unknown error: {e}")
+            raise e
         # if product := data.get("product"):
         #    stock = product.stock
         #    # quantity = data.get("quantity", 1)
@@ -1319,11 +1339,11 @@ class OrderItem(models.Model):
             )
             canceled = bool(canceled)
         except IntegrityError as e:
-            print(e)
-            print("invalid values; unable to perform update")
+            logger.error("invalid values; unable to perform update")
             raise e
         except Exception as e:
-            print(f"unknown error: {e}")
+            logger.error(f"unknown error: {e}")
+            raise e
         # stock = Stock.objects.filter(product_id=self.product_id).first()
         # stock.add(self.quantity, commit=False)
         # stock.items_sold -= self.quantity
